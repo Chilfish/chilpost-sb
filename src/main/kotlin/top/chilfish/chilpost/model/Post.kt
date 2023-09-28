@@ -12,8 +12,8 @@ data class Post(
     val parentId: Int = -1,
 
     val deleted: Boolean = false,
-    val deletedAt: String = LocalDateTime.MIN.toString(),
-    val createdAt: String = LocalDateTime.now().toString(),
+    val deletedAt: String,
+    val createdAt: String,
 )
 
 @Serializable
@@ -31,9 +31,9 @@ data class PostDetails(
     val id: Int,
     val content: String,
     val ownerId: Int,
-    val isBody: Boolean,
-    val parentId: Int,
-    val createdAt: LocalDateTime,
+    val isBody: Boolean = true,
+    val parentId: Int = -1,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
     val status: PostStatus,
     val owner: Owner
 )

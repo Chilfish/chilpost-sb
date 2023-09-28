@@ -2,6 +2,7 @@ package top.chilfish.chilpost.service
 
 import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertIgnoreAndGetId
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.model.*
@@ -14,12 +15,14 @@ class PostService {
 
     fun getById(id: Int) = PostWithOwner.query("select * from post_details where id = $id").toPosts()
 
-    fun newPost(content: String, ownerId: String) =
-        PostWithOwner.insert {
+    fun newPost(content: String, ownerId: String) {
+        val insertId = PostWithOwner.insertIgnoreAndGetId {
             it[PostWithOwner.content] = content
             it[PostWithOwner.ownerId] = ownerId.toInt()
-        }
+        }!!
 
+        return
+    }
 
     fun newComment(content: String, ownerId: String, parentId: String) =
         PostWithOwner.query(

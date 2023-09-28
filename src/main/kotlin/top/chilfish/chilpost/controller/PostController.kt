@@ -1,6 +1,5 @@
 package top.chilfish.chilpost.controller
 
-import org.jetbrains.exposed.sql.exposedLogger
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,6 +24,7 @@ class PostController(
     data class NewPost(val content: String, val owner_id: String)
 
     @PostMapping("/new")
-    fun newPost(@RequestBody form: NewPost) = postService.newPost(form.content, form.owner_id)
-
+    fun newPost(@RequestBody form: NewPost) {
+        return postService.newPost(form.content, form.owner_id)
+    }
 }
