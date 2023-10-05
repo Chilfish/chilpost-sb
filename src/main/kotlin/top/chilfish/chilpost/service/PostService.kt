@@ -1,14 +1,13 @@
 package top.chilfish.chilpost.service
 
-import org.jetbrains.exposed.sql.exists
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertIgnoreAndGetId
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import top.chilfish.chilpost.model.*
+import top.chilfish.chilpost.model.PostWithOwner
+import top.chilfish.chilpost.model.toPosts
 import top.chilfish.chilpost.utils.query
 
-@Component
+@Service
 @Transactional
 class PostService {
     fun getAll() = PostWithOwner.query("select * from post_with_owner").toPosts()
