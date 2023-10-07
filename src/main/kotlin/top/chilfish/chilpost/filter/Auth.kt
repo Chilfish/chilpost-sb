@@ -13,21 +13,42 @@ import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)
-@WebFilter(filterName = "AuthFilter", urlPatterns = ["/*"])
+@WebFilter(filterName = "AuthFilter", urlPatterns = ["/api/*"])
 class AuthFilter : Filter {
+    private val whiteList = listOf(
+        "/auth/.+",
+        "/post/all",
+        "/post/get",
+        "/post/comments",
+        "/user/@.+"
+    )
+
     override fun doFilter(
         request: ServletRequest?,
         response: ServletResponse?,
-        chain: FilterChain?
+        chain: FilterChain
     ) {
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
+        val path = req.requestURI.substring(req.contextPath.length).replace("/api", "")
+
+//        logger.info("AuthFilter: $path isInWhiteList ${isInWhiteList(path)}")
+
+        if (isInWhiteList(path)) {
+            chain.doFilter(request, response)
+            return
+        }
+
         val token = req.getHeader("Authorization")?.split(" ")?.toTypedArray()?.get(1)
         logger.info("AuthFilter: $token")
 
         val userInfo = verifyToken<User>(token) ?: return res.sendError(401, "Unauthorized")
 
         req.setAttribute("user", userInfo)
-        chain!!.doFilter(request, response)
+        chain.doFilter(request, response)
+    }
+
+    private fun isInWhiteList(path: String): Boolean {
+        return whiteList.any { path.matches(it.toRegex()) }
     }
 }

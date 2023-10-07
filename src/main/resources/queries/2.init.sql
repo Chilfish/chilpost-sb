@@ -40,6 +40,7 @@ Select u.id,
        u.email,
        u.created_at,
        u.deleted,
+       u.level,
        Json_Object(
            'post_count', us.post_count,
            'follower_count', us.follower_count,

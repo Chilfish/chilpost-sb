@@ -1,6 +1,7 @@
 package top.chilfish.chilpost.model
 
 import kotlinx.serialization.Serializable
+import java.time.LocalDateTime
 
 @Serializable
 data class Owner(
@@ -35,4 +36,19 @@ data class UserStatus(
 
     val followers: List<Int> = listOf(),
     val following: List<Int> = listOf(),
+)
+
+data class UserDetails(
+    val id: Int,
+    val name: String,
+    val nickname: String,
+    val password: String,
+    val email: String,
+    val avatar: String = "/placeholder.avatar.png",
+    val bio: String = "hello",
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val deleted: Boolean = false,
+    val level: String = "user",
+
+    val status: UserStatus,
 )
