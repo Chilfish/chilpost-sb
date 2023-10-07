@@ -9,3 +9,7 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+server:
+  error:
+    whitelabel:
+      enabled: false

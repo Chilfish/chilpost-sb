@@ -8,8 +8,9 @@ import jakarta.servlet.annotation.WebFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.annotation.Order
+import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.User
-import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)
@@ -40,9 +41,10 @@ class AuthFilter : Filter {
         }
 
         val token = req.getHeader("Authorization")?.split(" ")?.toTypedArray()?.get(1)
-        logger.info("AuthFilter: $token")
+//        logger.info("AuthFilter: $token")
 
-        val userInfo = verifyToken<User>(token) ?: return res.sendError(401, "Unauthorized")
+        val userInfo = verifyToken<User>(token)
+            ?: throw newError(ErrorCode.INVALID_TOKEN)
 
         req.setAttribute("user", userInfo)
         chain.doFilter(request, response)

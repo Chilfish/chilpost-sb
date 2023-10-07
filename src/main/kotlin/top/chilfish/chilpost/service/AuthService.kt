@@ -2,6 +2,8 @@ package top.chilfish.chilpost.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.*
 import top.chilfish.chilpost.utils.getToken
 import top.chilfish.chilpost.utils.logger
@@ -25,8 +27,10 @@ class AuthService {
 
         logger.info("AuthService: $user")
 
-        if (user == null || user.password != data.password)
-            throw Exception("Invalid email or password") // @TODO: use custom exception
+        if (user == null)
+            throw newError(ErrorCode.NOT_FOUND_USER)
+        if (user.password != data.password)
+            throw newError(ErrorCode.INVALID_LOGIN)
 
         return userWithToken(user)
     }
