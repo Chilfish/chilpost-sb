@@ -1,1 +1,1 @@
-rootProject.name = "chilpost"
+rootProject.name = "chilpost-sb"

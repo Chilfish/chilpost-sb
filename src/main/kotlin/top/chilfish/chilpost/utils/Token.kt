@@ -46,7 +46,10 @@ inline fun <reified T> getToken(data: T): String {
     return jws.getCompactSerialization()
 }
 
-inline fun <reified T> verifyToken(token: String): T? {
+inline fun <reified T> verifyToken(token: String?): T? {
+    if (token.isNullOrEmpty())
+        return null
+
     val jwtConsumer = JwtConsumerBuilder()
         .setRequireExpirationTime()
         .setAllowedClockSkewInSeconds(30)
