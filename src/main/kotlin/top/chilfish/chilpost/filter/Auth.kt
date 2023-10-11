@@ -43,11 +43,17 @@ class AuthFilter : Filter {
         val token = req.getHeader("Authorization")?.split(" ")?.toTypedArray()?.get(1)
 //        logger.info("AuthFilter: $token")
 
+        try {
+
         val userInfo = verifyToken<User>(token)
             ?: throw newError(ErrorCode.INVALID_TOKEN)
 
         req.setAttribute("user", userInfo)
         chain.doFilter(request, response)
+        }catch (e: Exception){
+            req.setAttribute("filter.error", e)
+            req.getRequestDispatcher("/error/filter").forward(req, res)
+        }
     }
 
     private fun isInWhiteList(path: String): Boolean {
