@@ -3,10 +3,12 @@ package top.chilfish.chilpost.controller
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.ApiReturn
+import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.PostService
-import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.response
 
 @Controller
@@ -18,18 +20,19 @@ class PostController(
     @GetMapping("/all")
     fun all() = response(data = postService.getAll())
 
-    @GetMapping("/test")
-    fun get(
-        @RequestAttribute("user") user: TokenData
-    ): ResponseEntity<ApiReturn<TokenData>> {
-        logger.info("PostController: $user")
-        return response(data = user)
-    }
-
-    data class NewPost(val content: String, val owner_id: String)
+    @GetMapping("/{id}")
+    fun getById(
+        @PathVariable id: String
+    ) = response(data = postService.getById(id))
 
     @PostMapping("/new")
-    fun newPost(@RequestBody form: NewPost) {
-        return postService.newPost(form.content, form.owner_id)
+    fun newPost(
+        @RequestBody form: NewPost,
+        @RequestAttribute("user") user: TokenData
+    ): ResponseEntity<ApiReturn<Int>> {
+        val id = postService.newPost(form.content, user.id, form.meta)
+        if (id == -1)
+            throw newError(ErrorCode.INVALID_ID)
+        return response(data = id)
     }
 }

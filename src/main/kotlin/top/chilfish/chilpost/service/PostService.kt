@@ -1,34 +1,58 @@
 package top.chilfish.chilpost.service
 
-import org.jetbrains.exposed.sql.insertIgnoreAndGetId
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import top.chilfish.chilpost.model.NewPostMeta
 import top.chilfish.chilpost.model.PostWithOwner
 import top.chilfish.chilpost.model.toPosts
+import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.query
 
 @Service
 @Transactional
 class PostService {
-    fun getAll() = PostWithOwner.query("select * from post_with_owner").toPosts()
+    private val table = "post_with_owner"
 
-    fun getById(id: Int) = PostWithOwner.query("select * from post_details where id = $id").toPosts()
+    fun getAll() = PostWithOwner.query("select * from $table").toPosts()
 
-    fun newPost(content: String, ownerId: String) {
-        val insertId = PostWithOwner.insertIgnoreAndGetId {
+    fun getById(id: String) = PostWithOwner.query("select * from $table where id = $id").toPosts()
+
+    fun newPost(content: String, ownerId: Int, meta: NewPostMeta): Int {
+        logger.info("newPost: $content, $ownerId, $meta")
+
+        if (meta.type == "comment")
+            return newComment(content, ownerId, meta.pcId)
+
+        if (meta.type !== "post")
+            return -1
+
+        val id = PostWithOwner.insertAndGetId {
             it[PostWithOwner.content] = content
-            it[PostWithOwner.ownerId] = ownerId.toInt()
-        }!!
+            it[PostWithOwner.ownerId] = ownerId
+        }
 
-        return
+        return id.value
     }
 
-    fun newComment(content: String, ownerId: String, parentId: String) =
+    fun newComment(content: String, ownerId: Int, parentId: String?): Int {
+        logger.info("newComment: $content, $ownerId, $parentId")
+        if (parentId == null)
+            return -1
+
         PostWithOwner.query(
-            "Insert Into posts (content, owner_id, parent_id, is_body)\n" +
-                    "Select $content, $ownerId, $parentId, False\n" +
-                    "Where Exists (Select 1 From posts Where id = $parentId)\n" +
-                    "And Exists(Select 1 From users Where id = $ownerId);"
-        )
+            "select * from users where id = $ownerId " +
+                    "and exists (select 1 from posts where id = $parentId);"
+        ).firstOrNull() ?: return -1
+
+        val id = PostWithOwner.insertAndGetId {
+            it[PostWithOwner.content] = content
+            it[PostWithOwner.ownerId] = ownerId
+            it[PostWithOwner.parentId] = parentId.toInt()
+            it[isBody] = false
+        }
+
+        return id.value
+    }
 
 }

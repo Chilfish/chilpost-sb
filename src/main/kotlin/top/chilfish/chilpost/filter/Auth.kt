@@ -19,7 +19,7 @@ class AuthFilter : Filter {
     private val whiteList = listOf(
         "/auth/.+",
         "/post/all",
-        "/post/get",
+        "/post/\\d+",
         "/post/comments",
         "/user/@.+"
     )

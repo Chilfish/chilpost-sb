@@ -14,7 +14,6 @@ class AuthService {
     fun userWithToken(user: UserDetails): UserToken {
         val token = getToken(TokenData(user.id, user.name))
 
-//        logger.info("AuthService: $token")
         return UserToken(token, user.copy(password = ""))
     }
 
@@ -22,12 +21,8 @@ class AuthService {
         val user = UserEntity
             .query("select * from user_details where email = '${data.email}' and deleted = false")
             .toUser()
-            .firstOrNull()
+            .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
 
-//        logger.info("AuthService: $user")
-
-        if (user == null)
-            throw newError(ErrorCode.NOT_FOUND_USER)
         if (user.password != data.password)
             throw newError(ErrorCode.INVALID_LOGIN)
 

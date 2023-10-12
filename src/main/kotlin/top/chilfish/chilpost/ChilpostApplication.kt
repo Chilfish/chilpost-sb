@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.boot.runApplication
 import org.springframework.boot.web.servlet.ServletComponentScan
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
@@ -15,16 +14,16 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
     value = [ExposedAutoConfiguration::class],
     exclude = [DataSourceTransactionManagerAutoConfiguration::class]
 )
-class Application : SpringBootServletInitializer() {
+class ChilpostApplication : SpringBootServletInitializer() {
 
     override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-        return application.sources(Application::class.java)
+        return application.sources(ChilpostApplication::class.java)
     }
 
 }
 
 fun configureApplication(builder: SpringApplicationBuilder): SpringApplicationBuilder {
-    return builder.sources(Application::class.java)
+    return builder.sources(ChilpostApplication::class.java)
 }
 
 fun main(args: Array<String>) {
