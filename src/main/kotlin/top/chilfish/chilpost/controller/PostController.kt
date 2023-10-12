@@ -5,9 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.ApiReturn
-import top.chilfish.chilpost.model.NewPost
-import top.chilfish.chilpost.model.TokenData
+import top.chilfish.chilpost.model.*
 import top.chilfish.chilpost.service.PostService
 import top.chilfish.chilpost.utils.response
 
@@ -25,6 +23,13 @@ class PostController(
         @PathVariable id: String
     ) = response(data = postService.getById(id))
 
+    @PostMapping("/comments")
+    fun getComments(
+        @RequestBody data: CommentIds
+    ): ResponseEntity<ApiReturn<List<PostDetails>>> {
+        return response(data = postService.getComments(data.commentIds))
+    }
+
     @PostMapping("/new")
     fun newPost(
         @RequestBody form: NewPost,
@@ -35,4 +40,10 @@ class PostController(
             throw newError(ErrorCode.INVALID_ID)
         return response(data = id)
     }
+
+    @PostMapping("/like")
+    fun likePost(
+        @RequestBody data: IdJson,
+        @RequestAttribute("user") user: TokenData
+    ) = response(data = postService.likePost(data.id.toInt(), user.id))
 }

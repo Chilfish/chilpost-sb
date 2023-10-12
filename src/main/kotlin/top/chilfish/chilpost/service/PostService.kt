@@ -55,4 +55,17 @@ class PostService {
         return id.value
     }
 
+    fun getComments(ids: List<Int>) = PostWithOwner.query(
+        "select * from $table " +
+                "where id in (${ids.joinToString()}) and is_body = false"
+    ).toPosts()
+
+    fun likePost(pid: Int, uid: Int): Any {
+        return PostWithOwner.query(
+            "Update post_status\n" +
+                    "Set like_count = like_count + 1,\n" +
+                    "    likes      = Json_Array_Append(likes, '\$', $uid)\n" +
+                    "Where post_id = $pid;"
+        ).firstOrNull() ?: return -1
+    }
 }
