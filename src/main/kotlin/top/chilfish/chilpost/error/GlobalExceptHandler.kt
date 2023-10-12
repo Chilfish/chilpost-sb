@@ -15,6 +15,7 @@ class GlobalExceptionHandler :
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiReturn<Nothing?>> {
+//        logger.error("GlobalExceptionHandler: $ex")
         val err = ex as MyError
         return response(err.code, err.statusCode, err.message, null)
     }

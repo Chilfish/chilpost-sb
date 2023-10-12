@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.annotation.Order
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.User
+import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)
@@ -45,12 +45,15 @@ class AuthFilter : Filter {
 
         try {
 
-        val userInfo = verifyToken<User>(token)
+        val userInfo = verifyToken<TokenData>(token)
             ?: throw newError(ErrorCode.INVALID_TOKEN)
 
         req.setAttribute("user", userInfo)
+
         chain.doFilter(request, response)
         }catch (e: Exception){
+//            logger.info("AuthFilter: $e")
+
             req.setAttribute("filter.error", e)
             req.getRequestDispatcher("/error/filter").forward(req, res)
         }

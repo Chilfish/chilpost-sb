@@ -6,7 +6,6 @@ import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.*
 import top.chilfish.chilpost.utils.getToken
-import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.query
 
 @Service
@@ -15,7 +14,7 @@ class AuthService {
     fun userWithToken(user: UserDetails): UserToken {
         val token = getToken(TokenData(user.id, user.name))
 
-        logger.info("AuthService: $token")
+//        logger.info("AuthService: $token")
         return UserToken(token, user.copy(password = ""))
     }
 
@@ -25,7 +24,7 @@ class AuthService {
             .toUser()
             .firstOrNull()
 
-        logger.info("AuthService: $user")
+//        logger.info("AuthService: $user")
 
         if (user == null)
             throw newError(ErrorCode.NOT_FOUND_USER)
