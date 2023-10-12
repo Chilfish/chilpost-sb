@@ -1,5 +1,7 @@
 package top.chilfish.chilpost.service
 
+import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.error.ErrorCode
@@ -27,5 +29,32 @@ class AuthService {
             throw newError(ErrorCode.INVALID_LOGIN)
 
         return userWithToken(user)
+    }
+
+    fun newUser(email: String, password: String) = UserDetails(
+        id = 0,
+        name = email.replace("[@.]".toRegex(), "_"),
+        nickname = email.split("@").first(),
+        password = password,
+        email = email,
+        status = UserStatus()
+    )
+
+    fun register(data: AuthData): UserToken {
+        val user = newUser(data.email, data.password)
+        try {
+            val res = UserEntity.insertAndGetId {
+                it[name] = user.name
+                it[nickname] = user.nickname
+                it[password] = user.password
+                it[email] = user.email
+            }
+
+            return userWithToken(user.copy(id = res.value))
+        } catch (e: ExposedSQLException) {
+            if (e.message?.contains("Duplicate entry") == true)
+                throw newError(ErrorCode.EXISTED_USER)
+            throw e
+        }
     }
 }

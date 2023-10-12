@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.datetime
 
-object UserEntity : IntIdTable("user_details") {
+object UserEntity : IntIdTable("users") {
     val name = varchar("name", 255)
     val nickname = varchar("nickname", 255)
     val password = varchar("password", 255)

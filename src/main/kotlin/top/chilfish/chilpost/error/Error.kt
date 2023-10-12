@@ -10,6 +10,8 @@ enum class ErrorCode {
     INVALID_TOKEN,
     INVALID_LOGIN,
     INVALID_ID,
+
+    EXISTED_USER,
 }
 
 data class MyError(
@@ -27,6 +29,7 @@ val Errors = listOf(
     MyError(ErrorCode.INVALID_LOGIN, 403, "Invalid password or email"),
 
     MyError(ErrorCode.INVALID_ID, 400, "Invalid id"),
+    MyError(ErrorCode.EXISTED_USER, 409, "User existed"),
 )
 
 
