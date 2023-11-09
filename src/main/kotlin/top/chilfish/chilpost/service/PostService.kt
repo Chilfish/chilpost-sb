@@ -14,7 +14,14 @@ import top.chilfish.chilpost.utils.query
 class PostService {
     private val table = "post_with_owner"
 
-    fun getAll() = PostWithOwner.query("select * from $table").toPosts()
+    fun getAll(): Map<String, Any> {
+        val posts = PostWithOwner.query("select * from $table").toPosts()
+
+        return mapOf(
+            "posts" to posts,
+            "count" to posts.size
+        )
+    }
 
     fun getById(id: String) = PostWithOwner.query("select * from $table where id = $id").toPosts()
 

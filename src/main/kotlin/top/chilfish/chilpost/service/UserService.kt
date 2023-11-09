@@ -6,6 +6,7 @@ import top.chilfish.chilpost.model.PostWithOwner
 import top.chilfish.chilpost.model.UserEntity
 import top.chilfish.chilpost.model.toPosts
 import top.chilfish.chilpost.model.toUser
+import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.query
 
 @Service
@@ -28,7 +29,7 @@ class UserService {
         val user = getByName(name) ?: return null
         val posts = getPostByOwner(user.id)
         return mapOf(
-            "user" to user,
+            "owner" to user,
             "posts" to posts,
             "count" to posts.size
         )

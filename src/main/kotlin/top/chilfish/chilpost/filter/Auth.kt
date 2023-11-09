@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
+import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)
@@ -19,9 +20,9 @@ class AuthFilter : Filter {
     private val whiteList = listOf(
         "/auth/.+",
         "/post/all",
-        "/post/\\d+",
+        "/post/get",
         "/post/comments",
-        "/user/@.+"
+        "/user/@/.+"
     )
 
     override fun doFilter(
@@ -44,18 +45,17 @@ class AuthFilter : Filter {
 //        logger.info("AuthFilter: $token")
 
         try {
+            val userInfo = verifyToken<TokenData>(token)
+                ?: throw newError(ErrorCode.INVALID_TOKEN)
 
-        val userInfo = verifyToken<TokenData>(token)
-            ?: throw newError(ErrorCode.INVALID_TOKEN)
+            req.setAttribute("user", userInfo)
 
-        req.setAttribute("user", userInfo)
-
-        chain.doFilter(request, response)
-        }catch (e: Exception){
+            chain.doFilter(request, response)
+        } catch (e: Exception) {
 //            logger.info("AuthFilter: $e")
 
             req.setAttribute("filter.error", e)
-            req.getRequestDispatcher("/error/filter").forward(req, res)
+            req.getRequestDispatcher("/err/filter").forward(req, res)
         }
     }
 

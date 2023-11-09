@@ -11,7 +11,7 @@ import top.chilfish.chilpost.utils.response
 
 @RestController
 class ErrorController {
-    @RequestMapping("/error/filter")
+    @RequestMapping("/err/filter")
     fun rethrow(request: HttpServletRequest): ResponseEntity<ApiReturn<Nothing?>> {
         val ex = request.getAttribute("filter.error") as Exception
         if (ex !is MyError) {

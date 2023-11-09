@@ -15,7 +15,7 @@ object UserEntity : IntIdTable("users") {
 
     val createdAt = datetime("created_at")
     val deleted = bool("deleted").default(false)
-    val level = varchar("level", 255).default("user")
+//    val level = varchar("level", 255).default("user")
 
     val status = text("status")
 }
@@ -30,7 +30,7 @@ fun List<ResultRow>.toUser() = this.map {
         email = it[UserEntity.email],
         avatar = it[UserEntity.avatar],
         bio = it[UserEntity.bio],
-        level = it[UserEntity.level],
+//        level = it[UserEntity.level],
         deleted = it[UserEntity.deleted],
         createdAt = it[UserEntity.createdAt],
         status = Json.decodeFromString(it[UserEntity.status])

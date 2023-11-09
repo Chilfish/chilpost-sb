@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.UserToken
+import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.UserService
 import top.chilfish.chilpost.utils.response
 
@@ -18,8 +18,10 @@ class UserController(
 ) {
     @GetMapping("/me")
     fun me(
-        @RequestAttribute("user") user: UserToken
-    ) = response(data = user)
+        @RequestAttribute("user") user: TokenData
+    ) = userService.getByName(user.name)?.let {
+        response(data = it.copy(password = ""))
+    }
 
     @GetMapping("/@/{name}")
     fun userHome(

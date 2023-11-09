@@ -64,9 +64,9 @@ inline fun <reified T> verifyToken(token: String?): T? {
         val jwtClaims = jwtConsumer.processToClaims(token)
         return Json.decodeFromString(jwtClaims.subject.toString())
     } catch (e: InvalidJwtException) {
-//        println("Invalid JWT! $e")
+//        logger.error("Invalid JWT! $e")
         if (e.hasExpired()) {
-            println("JWT expired at " + e.jwtContext.jwtClaims.expirationTime)
+            logger.info("JWT expired at " + e.jwtContext.jwtClaims.expirationTime)
         }
     }
     return null
