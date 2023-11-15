@@ -1,9 +1,13 @@
 package top.chilfish.chilpost.service
 
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.model.NewPostMeta
+import top.chilfish.chilpost.model.PostStatusT
 import top.chilfish.chilpost.model.PostWithOwner
 import top.chilfish.chilpost.model.toPosts
 import top.chilfish.chilpost.utils.logger
@@ -15,7 +19,7 @@ class PostService {
     private val table = "post_with_owner"
 
     fun getAll(): Map<String, Any> {
-        val posts = PostWithOwner.query("select * from $table").toPosts()
+        val posts = PostWithOwner.query("select * from $table where is_body is true;").toPosts()
 
         return mapOf(
             "posts" to posts,
@@ -23,7 +27,8 @@ class PostService {
         )
     }
 
-    fun getById(id: String) = PostWithOwner.query("select * from $table where id = $id").toPosts()
+    fun getById(id: String) =
+        PostWithOwner.query("select * from $table where id = $id Order By created_at Desc").toPosts()
 
     fun newPost(content: String, ownerId: Int, meta: NewPostMeta): Int {
         logger.info("newPost: $content, $ownerId, $meta")
@@ -31,7 +36,7 @@ class PostService {
         if (meta.type == "comment")
             return newComment(content, ownerId, meta.pcId)
 
-        if (meta.type !== "post")
+        if (meta.type != "post")
             return -1
 
         val id = PostWithOwner.insertAndGetId {
@@ -62,17 +67,26 @@ class PostService {
         return id.value
     }
 
-    fun getComments(ids: List<Int>) = PostWithOwner.query(
-        "select * from $table " +
-                "where id in (${ids.joinToString()}) and is_body = false"
-    ).toPosts()
+    fun getComments(ids: List<Int>): Map<String, Any> {
+        val comments = PostWithOwner.query(
+            "select * from $table " +
+                    "where id in (${ids.joinToString()}) and is_body = false Order By created_at Desc"
+        ).toPosts()
+
+        return mapOf(
+            "comments" to comments,
+            "count" to comments.size
+        )
+    }
 
     fun likePost(pid: Int, uid: Int): Any {
-        return PostWithOwner.query(
+        PostWithOwner.query(
             "Update post_status\n" +
                     "Set like_count = like_count + 1,\n" +
                     "    likes      = Json_Array_Append(likes, '\$', $uid)\n" +
                     "Where post_id = $pid;"
-        ).firstOrNull() ?: return -1
+        )
+
+        return 1
     }
 }

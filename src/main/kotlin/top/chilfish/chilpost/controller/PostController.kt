@@ -26,9 +26,8 @@ class PostController(
     @PostMapping("/comments")
     fun getComments(
         @RequestBody data: CommentIds
-    ): ResponseEntity<ApiReturn<List<PostDetails>>> {
-        return response(data = postService.getComments(data.commentIds))
-    }
+    ) = response(data = postService.getComments(data.commentIds))
+
 
     @PostMapping("/new")
     fun newPost(
