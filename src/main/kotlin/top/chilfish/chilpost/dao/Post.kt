@@ -80,8 +80,8 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
             .select { post_id eq parentId }
             .first()[PostStatusT.comments]
             .toMutableList()
-            .apply { add(id) }
-            .toIntArray()
+            .apply { add(id.toString()) }
+            .toTypedArray()
 
         PostStatusT.update({ post_id eq parentId }) {
             with(SqlExpressionBuilder) {
@@ -114,17 +114,17 @@ fun toggleLikePost(pid: Int, uid: Int): Int {
 
     var added = 1
 
-    if (likesArr.contains(uid)) {
-        likesArr.remove(uid)
+    if (likesArr.contains(uid.toString())) {
+        likesArr.remove(uid.toString())
         added = -1
     } else {
-        likesArr.add(uid)
+        likesArr.add(uid.toString())
     }
 
     val rows = PostStatusT.update({ post_id eq pid }) {
         with(SqlExpressionBuilder) {
             it[like_count] = like_count + added
-            it[likes] = likesArr.toIntArray()
+            it[likes] = likesArr.toTypedArray()
         }
     }
 

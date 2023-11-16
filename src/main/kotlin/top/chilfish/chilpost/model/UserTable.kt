@@ -26,6 +26,6 @@ object UserStatusT : IntIdTable("user_status") {
     val postCount = integer("post_count").default(0)
     val followerCount = integer("follower_count").default(0)
     val followingCount = integer("following_count").default(0)
-    val followers = json<IntArray>("followers", Json.Default).default(intArrayOf())
-    val followings = json<IntArray>("followings", Json.Default).default(intArrayOf())
+    val followers = json<Array<String>>("followers", Json.Default).default(arrayOf())
+    val followings = json<Array<String>>("followings", Json.Default).default(arrayOf())
 }

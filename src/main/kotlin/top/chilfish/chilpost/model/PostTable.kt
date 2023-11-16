@@ -23,9 +23,9 @@ object PostStatusT : IntIdTable("post_status") {
     val comment_count = integer("comment_count").default(0)
     val repost_count = integer("repost_count").default(0)
 
-    val likes = json<IntArray>("likes", Json.Default).default(intArrayOf())
-    val comments = json<IntArray>("comments", Json.Default).default(intArrayOf())
-    val reposts = json<IntArray>("reposts", Json.Default).default(intArrayOf())
+    val likes = json<Array<String>>("likes", Json.Default).default(arrayOf())
+    val comments = json<Array<String>>("comments", Json.Default).default(arrayOf())
+    val reposts = json<Array<String>>("reposts", Json.Default).default(arrayOf())
 }
 
 fun List<ResultRow>.toPosts() = this.map {
