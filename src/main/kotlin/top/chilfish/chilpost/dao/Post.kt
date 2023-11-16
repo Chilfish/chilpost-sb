@@ -1,6 +1,8 @@
 package top.chilfish.chilpost.dao
 
 import org.jetbrains.exposed.sql.*
+import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.MyError
 import top.chilfish.chilpost.model.PostStatusT
 import top.chilfish.chilpost.model.PostStatusT.likes
 import top.chilfish.chilpost.model.PostStatusT.post_id
@@ -20,7 +22,7 @@ fun toPostDetail(it: ResultRow) = mapOf(
         "like_count" to it[PostStatusT.like_count],
         "comment_count" to it[PostStatusT.comment_count],
         "repost_count" to it[PostStatusT.repost_count],
-        "likes" to it[PostStatusT.likes],
+        "likes" to it[likes],
         "comments" to it[PostStatusT.comments],
         "reposts" to it[PostStatusT.reposts],
     ),
@@ -60,8 +62,20 @@ fun getCommentsById(pcId: Int) = postQuery()
     .andWhere { parentId eq pcId }
     .andWhere { PostTable.isBody eq Op.FALSE }
 
-// add a pure post or a comment
+/**
+ * 新增一篇帖子或是评论，返回帖子详情
+ * 插入 posts 表和 post_status 表，更新 users 表的 post_count
+ * 如果是评论，还要更新 parent_post 的 comment_count 和 comments
+ */
 fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
+    var parentPost: ResultRow? = null
+
+    if (parentId != null) {
+        parentPost = PostStatusT
+            .select { post_id eq parentId }
+            .firstOrNull() ?: throw MyError(ErrorCode.NOT_FOUND_POST)
+    }
+
     val id = PostTable.insertAndGetId {
         it[PostTable.content] = content
         it[PostTable.ownerId] = ownerId
@@ -75,10 +89,8 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
     PostStatusT.insert { it[post_id] = id }
 
     // add a comment to parent post
-    if (parentId != null) {
-        val commentsArr = PostStatusT
-            .select { post_id eq parentId }
-            .first()[PostStatusT.comments]
+    if (parentId != null && parentPost != null) {
+        val commentsArr = parentPost[PostStatusT.comments]
             .toMutableList()
             .apply { add(id.toString()) }
             .toTypedArray()
@@ -100,9 +112,8 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
     return id
 }
 
-fun canComment(uid: Int, parentId: Int) = postWithOwner()
+fun canComment(parentId: Int) = postWithOwner()
     .select { PostTable.id eq parentId }
-    .andWhere { PostTable.ownerId eq uid }
     .firstOrNull() != null
 
 

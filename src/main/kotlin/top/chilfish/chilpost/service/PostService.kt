@@ -59,7 +59,7 @@ class PostService {
     fun newComment(content: String, ownerId: Int, parentId: String?): Int {
         val pid = parentId?.toIntOrNull() ?: return -1
 
-        if (!canComment(ownerId, pid))
+        if (!canComment(pid))
             return -1
 
         return addPost(content, ownerId, pid)

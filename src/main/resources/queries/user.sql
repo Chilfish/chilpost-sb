@@ -2,6 +2,10 @@
 Insert Into users (email, name, nickname, password)
 Values (:email, :name, :nickname, :password);
 
+-- Query: addUserStatus
+Insert Into user_status (user_id)
+Values (:id);
+
 -- Query: getUser
 Select *
 From user_details As u
@@ -40,7 +44,7 @@ Where id = :id
 
 -- Query: setFollowing
 Update user_status
-Set following       = Json_Array(:following),
+Set followings      = Json_Array(:followings),
     following_count = :following_count
 Where user_id = :id;
 
@@ -53,4 +57,4 @@ Where user_id = :id;
 -- Query: getUsers
 Select *
 From user_status As u
-Order By u.user_id Desc;
+Order By u.user_id;
