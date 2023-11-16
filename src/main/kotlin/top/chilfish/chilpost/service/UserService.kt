@@ -2,6 +2,7 @@ package top.chilfish.chilpost.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import top.chilfish.chilpost.dao.getUserDetails
 import top.chilfish.chilpost.model.PostWithOwner
 import top.chilfish.chilpost.model.UserEntity
 import top.chilfish.chilpost.model.toPosts
@@ -34,4 +35,6 @@ class UserService {
             "count" to posts.size
         )
     }
+
+    fun test(name: String) = getUserDetails(name)
 }

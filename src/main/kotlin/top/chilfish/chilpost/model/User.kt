@@ -50,5 +50,4 @@ data class UserDetails(
     val deleted: Boolean = false,
     val level: String = "user",
 
-    val status: UserStatus,
 )

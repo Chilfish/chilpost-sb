@@ -37,7 +37,7 @@ class AuthService {
         nickname = email.split("@").first(),
         password = password,
         email = email,
-        status = UserStatus()
+//        status = UserStatus()
     )
 
     fun register(data: AuthData): UserToken {

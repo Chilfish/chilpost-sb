@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
+import top.chilfish.chilpost.dao.getUserDetails
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
@@ -31,4 +32,9 @@ class UserController(
             ?: throw newError(ErrorCode.NOT_FOUND_USER)
         return response(data = data)
     }
+
+    @GetMapping("/test/{name}")
+    fun test(
+        @PathVariable name: String
+    ) = response(data = userService.test((name)))
 }
