@@ -34,6 +34,6 @@ data class PostDetails(
     val isBody: Boolean = true,
     val parentId: Int = -1,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val status: PostStatus,
-    val owner: Owner
+    val status: PostStatus? = null,
+    val owner: Owner? = null,
 )

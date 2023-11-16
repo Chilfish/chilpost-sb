@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.json.json
 import java.time.LocalDateTime
 
-object UserEntity : IntIdTable("users") {
+object UserTable : IntIdTable("users") {
     val name = varchar("name", 255)
     val nickname = varchar("nickname", 255)
     val password = varchar("password", 255)
@@ -25,7 +25,7 @@ object UserEntity : IntIdTable("users") {
 }
 
 object UserStatusT : IntIdTable("user_status") {
-    val userId = reference("user_id", UserEntity.id)
+    val userId = reference("user_id", UserTable.id)
     val postCount = integer("post_count").default(0)
     val followerCount = integer("follower_count").default(0)
     val followingCount = integer("following_count").default(0)
@@ -35,16 +35,16 @@ object UserStatusT : IntIdTable("user_status") {
 
 fun List<ResultRow>.toUser() = this.map {
     UserDetails(
-        id = it[UserEntity.id].value,
-        name = it[UserEntity.name],
-        nickname = it[UserEntity.nickname],
-        password = it[UserEntity.password],
-        email = it[UserEntity.email],
-        avatar = it[UserEntity.avatar],
-        bio = it[UserEntity.bio],
-        level = it[UserEntity.level],
-        deleted = it[UserEntity.deleted],
-        createdAt = it[UserEntity.createdAt],
+        id = it[UserTable.id].value,
+        name = it[UserTable.name],
+        nickname = it[UserTable.nickname],
+        password = it[UserTable.password],
+        email = it[UserTable.email],
+        avatar = it[UserTable.avatar],
+        bio = it[UserTable.bio],
+        level = it[UserTable.level],
+        deleted = it[UserTable.deleted],
+        createdAt = it[UserTable.createdAt],
 //        status = Json.decodeFromString(it[UserEntity.status])
     )
 }

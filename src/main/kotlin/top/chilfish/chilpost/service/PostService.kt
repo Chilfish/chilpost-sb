@@ -1,14 +1,12 @@
 package top.chilfish.chilpost.service
 
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.statements.UpdateStatement
-import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import top.chilfish.chilpost.dao.getPostByOwner
+import top.chilfish.chilpost.dao.postWithOwner
 import top.chilfish.chilpost.model.NewPostMeta
-import top.chilfish.chilpost.model.PostStatusT
-import top.chilfish.chilpost.model.PostWithOwner
+import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.toPosts
 import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.query
@@ -19,7 +17,7 @@ class PostService {
     private val table = "post_with_owner"
 
     fun getAll(): Map<String, Any> {
-        val posts = PostWithOwner.query("select * from $table where is_body is true;").toPosts()
+        val posts = PostTable.query("select * from $table where is_body is true;").toPosts()
 
         return mapOf(
             "posts" to posts,
@@ -28,7 +26,7 @@ class PostService {
     }
 
     fun getById(id: String) =
-        PostWithOwner.query("select * from $table where id = $id Order By created_at Desc").toPosts()
+        PostTable.query("select * from $table where id = $id Order By created_at Desc").toPosts()
 
     fun newPost(content: String, ownerId: Int, meta: NewPostMeta): Int {
         logger.info("newPost: $content, $ownerId, $meta")
@@ -39,9 +37,9 @@ class PostService {
         if (meta.type != "post")
             return -1
 
-        val id = PostWithOwner.insertAndGetId {
-            it[PostWithOwner.content] = content
-            it[PostWithOwner.ownerId] = ownerId
+        val id = PostTable.insertAndGetId {
+            it[PostTable.content] = content
+            it[PostTable.ownerId] = ownerId
         }
 
         return id.value
@@ -52,15 +50,15 @@ class PostService {
         if (parentId == null)
             return -1
 
-        PostWithOwner.query(
+        PostTable.query(
             "select * from users where id = $ownerId " +
                     "and exists (select 1 from posts where id = $parentId);"
         ).firstOrNull() ?: return -1
 
-        val id = PostWithOwner.insertAndGetId {
-            it[PostWithOwner.content] = content
-            it[PostWithOwner.ownerId] = ownerId
-            it[PostWithOwner.parentId] = parentId.toInt()
+        val id = PostTable.insertAndGetId {
+            it[PostTable.content] = content
+            it[PostTable.ownerId] = ownerId
+            it[PostTable.parentId] = parentId.toInt()
             it[isBody] = false
         }
 
@@ -68,7 +66,7 @@ class PostService {
     }
 
     fun getComments(ids: List<Int>): Map<String, Any> {
-        val comments = PostWithOwner.query(
+        val comments = PostTable.query(
             "select * from $table " +
                     "where id in (${ids.joinToString()}) and is_body = false Order By created_at Desc"
         ).toPosts()
@@ -80,7 +78,7 @@ class PostService {
     }
 
     fun likePost(pid: Int, uid: Int): Any {
-        PostWithOwner.query(
+        PostTable.query(
             "Update post_status\n" +
                     "Set like_count = like_count + 1,\n" +
                     "    likes      = Json_Array_Append(likes, '\$', $uid)\n" +
@@ -89,4 +87,6 @@ class PostService {
 
         return 1
     }
+
+    fun test(name: String) = getPostByOwner(name)
 }

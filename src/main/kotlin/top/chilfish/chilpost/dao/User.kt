@@ -1,30 +1,25 @@
 package top.chilfish.chilpost.dao
 
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.UserEntity
+import top.chilfish.chilpost.model.UserTable
 import top.chilfish.chilpost.model.UserStatusT
-import top.chilfish.chilpost.utils.logger
 
-fun getUserDetails(name: String): Any {
-    val res = (UserEntity innerJoin UserStatusT)
-        .select { UserEntity.name eq name }
+fun getUserDetails(name: String): List<Map<String, Any>> {
+    val res = (UserTable innerJoin UserStatusT)
+        .select { UserTable.name eq name }
         .withDistinct()
         .map {
             mapOf(
-                "id" to it[UserEntity.id].value,
-                "name" to it[UserEntity.name],
-                "nickname" to it[UserEntity.nickname],
-                "password" to it[UserEntity.password],
-                "email" to it[UserEntity.email],
-                "avatar" to it[UserEntity.avatar],
-                "bio" to it[UserEntity.bio],
-                "deleted" to it[UserEntity.deleted],
-                "createdAt" to it[UserEntity.createdAt],
-                "updatedAt" to it[UserEntity.updatedAt],
+                "id" to it[UserTable.id].value,
+                "name" to it[UserTable.name],
+                "nickname" to it[UserTable.nickname],
+                "email" to it[UserTable.email],
+                "avatar" to it[UserTable.avatar],
+                "bio" to it[UserTable.bio],
+                "deleted" to it[UserTable.deleted],
+                "createdAt" to it[UserTable.createdAt],
                 "status" to mapOf(
                     "post_count" to it[UserStatusT.postCount],
                     "follower_count" to it[UserStatusT.followerCount],

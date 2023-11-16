@@ -45,4 +45,9 @@ class PostController(
         @RequestBody data: IdJson,
         @RequestAttribute("user") user: TokenData
     ) = response(data = postService.likePost(data.id.toInt(), user.id))
+
+    @GetMapping("/test/{name}")
+    fun test(
+        @PathVariable name: String
+    ) = response(data = postService.test(name))
 }

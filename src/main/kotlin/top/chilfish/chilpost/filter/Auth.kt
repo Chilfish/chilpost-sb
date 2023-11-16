@@ -23,7 +23,8 @@ class AuthFilter : Filter {
         "/post/get",
         "/post/comments",
         "/user/@/.+",
-        "/user/test/.+"
+        "/user/test/.+",
+        "/post/test/.+"
     )
 
     override fun doFilter(

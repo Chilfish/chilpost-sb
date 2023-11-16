@@ -20,7 +20,7 @@ class AuthService {
     }
 
     fun login(data: AuthData): UserToken {
-        val user = UserEntity
+        val user = UserTable
             .query("select * from user_details where email = '${data.email}' and deleted = false")
             .toUser()
             .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
@@ -43,7 +43,7 @@ class AuthService {
     fun register(data: AuthData): UserToken {
         val user = newUser(data.email, data.password)
         try {
-            val res = UserEntity.insertAndGetId {
+            val res = UserTable.insertAndGetId {
                 it[name] = user.name
                 it[nickname] = user.nickname
                 it[password] = user.password

@@ -20,9 +20,7 @@ class UserController(
     @GetMapping("/me")
     fun me(
         @RequestAttribute("user") user: TokenData
-    ) = userService.getByName(user.name)?.let {
-        response(data = it.copy(password = ""))
-    }
+    ) = response(data = userService.getByName(user.name))
 
     @GetMapping("/@/{name}")
     fun userHome(
