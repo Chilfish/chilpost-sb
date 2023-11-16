@@ -1,9 +1,7 @@
 package top.chilfish.chilpost.dao
 
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import top.chilfish.chilpost.model.PostStatusT
-import top.chilfish.chilpost.model.PostStatusT.like_count
 import top.chilfish.chilpost.model.PostStatusT.likes
 import top.chilfish.chilpost.model.PostStatusT.post_id
 import top.chilfish.chilpost.model.PostTable
@@ -56,7 +54,7 @@ fun getAllPosts() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
 
 fun getPostByOwner(name: String) = getAllPosts().andWhere { UserTable.name eq name }
 
-fun getPostById(id: Int) = getAllPosts().andWhere { PostTable.id eq id }
+fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
 
 fun getCommentsById(pcId: Int) = postQuery()
     .andWhere { parentId eq pcId }

@@ -1,7 +1,6 @@
 package top.chilfish.chilpost.model
 
 import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
 
 @Serializable
 data class Owner(

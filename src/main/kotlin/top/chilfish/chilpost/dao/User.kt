@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
 

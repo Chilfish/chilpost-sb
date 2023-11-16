@@ -2,7 +2,6 @@ package top.chilfish.chilpost.model
 
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.json.json
 import java.time.LocalDateTime

@@ -4,8 +4,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.model.NewPostMeta
-import top.chilfish.chilpost.model.PostTable
-import top.chilfish.chilpost.utils.query
 
 @Service
 @Transactional
@@ -19,10 +17,21 @@ class PostService {
         )
     }
 
-    fun getById(id: String) =
-        id.toIntOrNull()?.let {
-            getPostById(it).map(::toPostWithOwner).firstOrNull()
-        } ?: emptyMap()
+    fun getById(id: String): MutableMap<String, Any>? {
+        val post = id.toIntOrNull()?.let {
+            getPostById(it).map(::toPostWithOwner).firstOrNull()?.toMutableMap()
+        } ?: return null
+
+
+        if (post["parent_id"] != -1) {
+            val parent = getPostById(post["parent_id"] as Int)
+                .map(::toPostWithOwner).firstOrNull() ?: return null
+
+            post["parent_post"] = parent
+        }
+
+        return post
+    }
 
     fun getComments(pcId: String): Map<String, Any> {
         val comments = pcId.toIntOrNull()?.let {
@@ -57,7 +66,16 @@ class PostService {
     }
 
 
-    fun likePost(pid: Int, uid: Int) = toggleLikePost(pid, uid)
+    fun likePost(pid: String, uid: String): Int {
+        val postId = pid.toIntOrNull()
+        val userId = uid.toIntOrNull()
+
+        return if (postId != null && userId != null) {
+            toggleLikePost(postId, userId)
+        } else {
+            -1
+        }
+    }
 
     fun test(name: String) = getPostByOwner(name)
 }
