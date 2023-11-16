@@ -21,7 +21,7 @@ class PostController(
     @GetMapping("get")
     fun getById(
         @RequestParam id: String
-    ) = response(data = postService.getById(id)[0])
+    ) = response(data = postService.getById(id))
 
     @PostMapping("/comments")
     fun getComments(

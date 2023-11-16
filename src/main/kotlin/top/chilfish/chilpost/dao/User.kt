@@ -1,12 +1,14 @@
 package top.chilfish.chilpost.dao
 
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.UserTable
 import top.chilfish.chilpost.model.UserStatusT
+import top.chilfish.chilpost.model.toUser
 
-fun getUserDetails(name: String): List<Map<String, Any>> {
+fun getUserDetail(name: String): List<Map<String, Any>> {
     val res = (UserTable innerJoin UserStatusT)
         .select { UserTable.name eq name }
         .withDistinct()
@@ -36,3 +38,16 @@ fun getUserDetails(name: String): List<Map<String, Any>> {
 
     return res
 }
+
+fun getUserByEmail(email: String) = UserTable
+    .select { UserTable.email eq email }
+    .firstOrNull()
+    ?.toUser()
+
+fun addUser(name: String, nickname: String, email: String, password: String) = UserTable
+    .insertAndGetId {
+        it[UserTable.name] = name
+        it[UserTable.nickname] = nickname
+        it[UserTable.password] = password
+        it[UserTable.email] = email
+    }.value

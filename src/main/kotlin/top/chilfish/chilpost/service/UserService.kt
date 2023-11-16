@@ -3,16 +3,18 @@ package top.chilfish.chilpost.service
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.getPostByOwner
-import top.chilfish.chilpost.dao.getUserDetails
+import top.chilfish.chilpost.dao.getUserDetail
+import top.chilfish.chilpost.dao.toPostWithOwner
 
 @Service
 @Transactional
 class UserService {
-    fun getByName(name: String) = getUserDetails(name).firstOrNull()
+    fun getByName(name: String) = getUserDetail(name).firstOrNull()
 
     fun userHome(name: String): Map<String, Any>? {
         val user = getByName(name) ?: return null
-        val posts = getPostByOwner(name)
+        val posts = getPostByOwner(name).map(::toPostWithOwner)
+
         return mapOf(
             "owner" to user,
             "posts" to posts,
@@ -20,5 +22,5 @@ class UserService {
         )
     }
 
-    fun test(name: String) = getUserDetails(name)
+    fun test(name: String) = getUserDetail(name)
 }

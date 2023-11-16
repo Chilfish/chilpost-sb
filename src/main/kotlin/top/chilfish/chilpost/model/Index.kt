@@ -12,7 +12,7 @@ data class ApiReturn<T>(
     val data: T? = null
 )
 
-data class UserToken(val token: String, val user: UserDetails)
+data class UserToken(val token: String, val user: User)
 
 @Serializable
 data class TokenData(val id: Int, val name: String)

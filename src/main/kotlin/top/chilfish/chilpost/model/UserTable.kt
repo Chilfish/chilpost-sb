@@ -20,8 +20,6 @@ object UserTable : IntIdTable("users") {
     val deletedAt = datetime("deleted_at").default(LocalDateTime.now())
     val createdAt = datetime("created_at").default(LocalDateTime.now())
     val updatedAt = datetime("updated_at").default(LocalDateTime.now())
-
-//    val status = text("status")
 }
 
 object UserStatusT : IntIdTable("user_status") {
@@ -33,8 +31,8 @@ object UserStatusT : IntIdTable("user_status") {
     val followings = json<IntArray>("followings", Json.Default).default(intArrayOf())
 }
 
-fun List<ResultRow>.toUser() = this.map {
-    UserDetails(
+fun ResultRow.toUser() = this.let {
+    User(
         id = it[UserTable.id].value,
         name = it[UserTable.name],
         nickname = it[UserTable.nickname],
@@ -44,7 +42,8 @@ fun List<ResultRow>.toUser() = this.map {
         bio = it[UserTable.bio],
         level = it[UserTable.level],
         deleted = it[UserTable.deleted],
-        createdAt = it[UserTable.createdAt],
-//        status = Json.decodeFromString(it[UserEntity.status])
+        createdAt = it[UserTable.createdAt].toString(),
+        updatedAt = it[UserTable.updatedAt].toString(),
+        deletedAt = it[UserTable.deletedAt].toString(),
     )
 }

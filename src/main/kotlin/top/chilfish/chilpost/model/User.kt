@@ -13,7 +13,7 @@ data class Owner(
 
 @Serializable
 data class User(
-    val id: Int,
+    val id: Int = 0,
     val name: String,
     val nickname: String,
     val password: String,
@@ -22,10 +22,10 @@ data class User(
     val bio: String = "hello",
     val level: String = "user",
 
-    val createdAt: String,
-    val updatedAt: String,
-    val deleted: Boolean,
-    val deletedAt: String,
+    val createdAt: String = LocalDateTime.now().toString(),
+    val updatedAt: String = LocalDateTime.now().toString(),
+    val deleted: Boolean = false,
+    val deletedAt: String = LocalDateTime.now().toString(),
 )
 
 @Serializable
@@ -36,18 +36,4 @@ data class UserStatus(
 
     val followers: List<Int> = listOf(),
     val following: List<Int> = listOf(),
-)
-
-data class UserDetails(
-    val id: Int,
-    val name: String,
-    val nickname: String,
-    val password: String,
-    val email: String,
-    val avatar: String = "/placeholder.avatar.png",
-    val bio: String = "hello",
-    val createdAt: LocalDateTime = LocalDateTime.now(),
-    val deleted: Boolean = false,
-    val level: String = "user",
-
 )
