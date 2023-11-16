@@ -18,16 +18,15 @@ class PostController(
     @GetMapping("/all")
     fun all() = response(data = postService.getAll())
 
-    @GetMapping("get")
+    @GetMapping("/get")
     fun getById(
         @RequestParam id: String
     ) = response(data = postService.getById(id))
 
-    @PostMapping("/comments")
+    @GetMapping("/comments")
     fun getComments(
-        @RequestBody data: CommentIds
-    ) = response(data = postService.getComments(data.commentIds))
-
+        @RequestParam id: String
+    ) = response(data = postService.getComments(id))
 
     @PostMapping("/new")
     fun newPost(

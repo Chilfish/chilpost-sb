@@ -9,7 +9,7 @@ import top.chilfish.chilpost.dao.toPostWithOwner
 @Service
 @Transactional
 class UserService {
-    fun getByName(name: String) = getUserDetail(name).firstOrNull()
+    fun getByName(name: String) = getUserDetail(name)
 
     fun userHome(name: String): Map<String, Any>? {
         val user = getByName(name) ?: return null

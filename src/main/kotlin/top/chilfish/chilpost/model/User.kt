@@ -22,10 +22,10 @@ data class User(
     val bio: String = "hello",
     val level: String = "user",
 
-    val createdAt: String = LocalDateTime.now().toString(),
-    val updatedAt: String = LocalDateTime.now().toString(),
-    val deleted: Boolean = false,
-    val deletedAt: String = LocalDateTime.now().toString(),
+//    val created_at: String = LocalDateTime.now().toString(),
+//    val deleted: Boolean = false,
+
+    val status: UserStatus = UserStatus(),
 )
 
 @Serializable
@@ -35,5 +35,5 @@ data class UserStatus(
     val following_count: Int = 0,
 
     val followers: List<Int> = listOf(),
-    val following: List<Int> = listOf(),
+    val followings: List<Int> = listOf(),
 )

@@ -38,10 +38,8 @@ class AuthFilter : Filter {
 
 //        logger.info("AuthFilter: $path isInWhiteList ${isInWhiteList(path)}")
 
-        if (isInWhiteList(path)) {
-            chain.doFilter(request, response)
-            return
-        }
+        if (isInWhiteList(path))
+            return chain.doFilter(request, response)
 
         val token = req.getHeader("Authorization")?.split(" ")?.toTypedArray()?.get(1)
 //        logger.info("AuthFilter: $token")

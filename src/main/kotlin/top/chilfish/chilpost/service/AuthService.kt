@@ -1,5 +1,8 @@
 package top.chilfish.chilpost.service
 
+import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,6 +15,7 @@ import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserToken
 import top.chilfish.chilpost.utils.getToken
+import top.chilfish.chilpost.utils.logger
 
 @Service
 @Transactional
@@ -23,12 +27,17 @@ class AuthService {
     }
 
     fun login(data: AuthData): UserToken {
-        val user = getUserByEmail(data.email) ?: throw newError(ErrorCode.NOT_FOUND_USER)
+        val user = getUserByEmail(data.email)
 
-        if (user.password != data.password)
+        if (user["password"] != data.password)
             throw newError(ErrorCode.INVALID_LOGIN)
 
-        return userWithToken(user)
+        val gson = Gson()
+
+        logger.info(gson.toJson(user))
+        val u = gson.fromJson(gson.toJson(user), User::class.java)
+
+        return userWithToken(u)
     }
 
     fun register(data: AuthData): UserToken {

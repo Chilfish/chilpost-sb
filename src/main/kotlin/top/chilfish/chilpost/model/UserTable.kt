@@ -30,20 +30,3 @@ object UserStatusT : IntIdTable("user_status") {
     val followers = json<IntArray>("followers", Json.Default).default(intArrayOf())
     val followings = json<IntArray>("followings", Json.Default).default(intArrayOf())
 }
-
-fun ResultRow.toUser() = this.let {
-    User(
-        id = it[UserTable.id].value,
-        name = it[UserTable.name],
-        nickname = it[UserTable.nickname],
-        password = it[UserTable.password],
-        email = it[UserTable.email],
-        avatar = it[UserTable.avatar],
-        bio = it[UserTable.bio],
-        level = it[UserTable.level],
-        deleted = it[UserTable.deleted],
-        createdAt = it[UserTable.createdAt].toString(),
-        updatedAt = it[UserTable.updatedAt].toString(),
-        deletedAt = it[UserTable.deletedAt].toString(),
-    )
-}
