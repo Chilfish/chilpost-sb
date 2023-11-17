@@ -32,7 +32,7 @@ class AuthService {
 
         val gson = Gson()
 
-        logger.info(gson.toJson(user))
+//        logger.info(gson.toJson(user))
         val u = gson.fromJson(gson.toJson(user), User::class.java)
 
         return userWithToken(u)

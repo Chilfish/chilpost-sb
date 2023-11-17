@@ -7,6 +7,7 @@ enum class ErrorCode {
     NOT_FOUND_POST,
     NOT_FOUND_COMMENT,
 
+    INVALID_PARAM,
     INVALID_TOKEN,
     INVALID_LOGIN,
     INVALID_ID,
@@ -25,6 +26,7 @@ val Errors = listOf(
     MyError(ErrorCode.NOT_FOUND_POST, 404, "Post not found"),
     MyError(ErrorCode.NOT_FOUND_COMMENT, 404, "Comment not found"),
 
+    MyError(ErrorCode.INVALID_PARAM, 400, "Invalid param"),
     MyError(ErrorCode.INVALID_TOKEN, 403, "Invalid token"),
     MyError(ErrorCode.INVALID_LOGIN, 403, "Invalid password or email"),
 

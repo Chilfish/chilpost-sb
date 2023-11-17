@@ -1,13 +1,14 @@
 package top.chilfish.chilpost.dao
 
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
+import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserStatusT
+import top.chilfish.chilpost.model.UserStatusT.followers
+import top.chilfish.chilpost.model.UserStatusT.followings
 import top.chilfish.chilpost.model.UserTable
+import top.chilfish.chilpost.utils.logger
 
 fun toUserDetail(it: ResultRow) = mapOf(
     "id" to it[UserTable.id].value,
@@ -24,8 +25,8 @@ fun toUserDetail(it: ResultRow) = mapOf(
         "post_count" to it[UserStatusT.postCount],
         "follower_count" to it[UserStatusT.followerCount],
         "following_count" to it[UserStatusT.followingCount],
-        "followers" to it[UserStatusT.followers],
-        "followings" to it[UserStatusT.followings],
+        "followers" to it[followers],
+        "followings" to it[followings],
     ),
 )
 
@@ -60,3 +61,44 @@ fun addUser(name: String, nickname: String, email: String, password: String): In
 
     return id
 }
+
+fun toggleFollow(uid: String, fid: String): Int {
+    val me = UserStatusT.select { UserStatusT.userId eq uid.toInt() }.first()
+    val other = UserStatusT.select { UserStatusT.userId eq fid.toInt() }.firstOrNull()
+        ?: throw newError(ErrorCode.NOT_FOUND_USER)
+
+    val myFollowings = me[followings].toMutableList() // 我的关注列表
+    val otherFollowers = other[followers].toMutableList() // 对方的粉丝列表
+
+    if (myFollowings.contains(fid)) {
+        myFollowings.remove(fid)
+        otherFollowers.remove(uid)
+    } else {
+        myFollowings.add(fid)
+        otherFollowers.add(uid)
+    }
+
+    val res1 = UserStatusT.update({ UserStatusT.userId eq uid.toInt() }) {
+        it[followings] = myFollowings.toTypedArray()
+        it[followingCount] = myFollowings.size
+    }
+
+    val res2 = UserStatusT.update({ UserStatusT.userId eq fid.toInt() }) {
+        it[followers] = otherFollowers.toTypedArray()
+        it[followerCount] = otherFollowers.size
+    }
+
+    return res1 + res2
+}
+
+fun updateUser(uid: Int, newUser: User) =
+    UserTable.update({ UserTable.id eq uid }) {
+        it[name] = newUser.name
+        it[nickname] = newUser.nickname
+        it[email] = newUser.email
+        it[avatar] = newUser.avatar
+        it[bio] = newUser.bio
+
+        // TODO: admin only
+        // it[level] = newUser.level
+    }

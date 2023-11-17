@@ -24,7 +24,7 @@ data class User(
 //    val created_at: String = LocalDateTime.now().toString(),
 //    val deleted: Boolean = false,
 
-    val status: UserStatus = UserStatus(),
+    val status: UserStatus? = UserStatus(),
 )
 
 @Serializable
