@@ -13,7 +13,6 @@ import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserToken
 import top.chilfish.chilpost.utils.getToken
-import top.chilfish.chilpost.utils.logger
 
 @Service
 @Transactional

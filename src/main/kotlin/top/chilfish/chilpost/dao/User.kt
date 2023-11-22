@@ -8,7 +8,6 @@ import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserStatusT.followers
 import top.chilfish.chilpost.model.UserStatusT.followings
 import top.chilfish.chilpost.model.UserTable
-import top.chilfish.chilpost.utils.logger
 
 fun toUserDetail(it: ResultRow) = mapOf(
     "id" to it[UserTable.id].value,

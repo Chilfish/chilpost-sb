@@ -27,8 +27,8 @@ val Errors = listOf(
     MyError(ErrorCode.NOT_FOUND_COMMENT, 404, "Comment not found"),
 
     MyError(ErrorCode.INVALID_PARAM, 400, "Invalid param"),
-    MyError(ErrorCode.INVALID_TOKEN, 403, "Invalid token"),
-    MyError(ErrorCode.INVALID_LOGIN, 403, "Invalid password or email"),
+    MyError(ErrorCode.INVALID_TOKEN, 401, "Invalid token"),
+    MyError(ErrorCode.INVALID_LOGIN, 401, "Invalid password or email"),
 
     MyError(ErrorCode.INVALID_ID, 400, "Invalid id"),
     MyError(ErrorCode.EXISTED_USER, 409, "User existed"),
