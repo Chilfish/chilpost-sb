@@ -22,7 +22,6 @@
 **/*.jfm
 **/.gradle
 **/bin
-**/build
 **/charts
 **/docker-compose*
 **/compose*

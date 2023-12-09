@@ -14,11 +14,11 @@ group = "top.chilfish"
 version = "0.0.1"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 kotlin {
-    jvmToolchain(19)
+    jvmToolchain(17)
 }
 
 repositories {
@@ -52,7 +52,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs += "-Xjsr305=strict"
-            jvmTarget = "19"
+            jvmTarget = "17"
         }
     }
 

@@ -2,9 +2,9 @@ spring:
   exposed:
     generate-ddl: true
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/chilpost-sb
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/chilpost_sb
     username: root
-    password: CHILLSQL
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     problemdetails:

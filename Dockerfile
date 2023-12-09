@@ -1,18 +1,9 @@
-FROM eclipse-temurin:19-jdk-jammy as base
+FROM openjdk:17
 
-# 设置工作目录
 WORKDIR /app
 
-COPY . .
-
-# 打包
-RUN ./gradlew build
-
-COPY build/libs/*.jar app.jar
-
-# 复制密码文件到工作目录
-COPY password.txt password.txt
+COPY build/libs/chilpost-sb-0.0.1.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+CMD ["java", "-jar", "app.jar"]
