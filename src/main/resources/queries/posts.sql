@@ -60,3 +60,20 @@ Set like_count = like_count - 1,
     likes      = Json_Remove(likes, Json_Unquote(Json_Search(likes, 'one', :user_id)))
 Where post_id = :post_id
   And Json_Search(likes, 'one', :user_id) Is Not Null;
+
+
+SELECT *
+FROM posts
+WHERE MATCH(content) AGAINST('索引');
+
+SELECT *
+FROM posts
+WHERE MATCH(content) AGAINST('索引' IN BOOLEAN MODE);
+
+SELECT *
+FROM posts
+WHERE MATCH(content) AGAINST('索引' WITH QUERY EXPANSION);
+
+SELECT *
+FROM posts
+Where content Like '%索引%';
