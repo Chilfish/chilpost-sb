@@ -1,20 +1,23 @@
 services:
   api:
+    container_name: chilpost_sb
     build: 
       context: .
-      dockerfile: Dockerfile
     ports:
       - 8080:8080
     depends_on:
-      - db
-  db:
-    image: mysql
+      - mysql
+    environment:
+      - MYSQL_URL=jdbc:mysql://mysql/chilpost_sb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+
+  mysql:
+    image: mysql:8.2.0
+    container_name: chilpost_mysql
     restart: always
     environment:
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-password
       - MYSQL_DATABASE=chilpost_sb
-      - MYSQL_USER=mysql
       - MYSQL_PASSWORD_FILE=/run/secrets/db-password
     secrets:
       - db-password

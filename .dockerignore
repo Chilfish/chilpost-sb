@@ -21,6 +21,7 @@
 **/*.dbmdl
 **/*.jfm
 **/.gradle
+**/build
 **/bin
 **/charts
 **/docker-compose*

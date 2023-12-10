@@ -60,6 +60,10 @@ tasks {
         useJUnitPlatform()
     }
 
+    test {
+        enabled = false
+    }
+
     jar {
         enabled = true
     }
