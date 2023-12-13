@@ -8,7 +8,7 @@ services:
     depends_on:
       - mysql
     environment:
-      - MYSQL_URL=jdbc:mysql://mysql:4446/chilpost_sb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      - MYSQL_URL=jdbc:mysql://mysql:3336/chilpost_sb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
 
   mysql:
     image: mysql:8.2.0
