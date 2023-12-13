@@ -1,22 +1,13 @@
 # syntax=docker/dockerfile:1
 
-FROM openjdk:17-jdk-alpine as base
-
-WORKDIR /app
-
-COPY . .
-
-RUN sh ./gradlew build
-
-FROM openjdk:17-jdk-alpine as prod
+FROM openjdk:17-jdk-alpine
 
 WORKDIR /app
 
 ARG APPNAME=chilpost-sb-0.0.1
 
-COPY --from=base /app/build/libs/$APPNAME.jar app.jar
-
-EXPOSE 8080
+# We should build the jar file first
+COPY ./build/libs/$APPNAME.jar /app/app.jar
 
 ENV JAVA_OPTS="\
   -server \
@@ -26,5 +17,7 @@ ENV JAVA_OPTS="\
   -XX:MaxMetaspaceSize=512m"
 
 ENV PARAMS=""
+
+EXPOSE 8080
 
 ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS app.jar $PARAMS"]
