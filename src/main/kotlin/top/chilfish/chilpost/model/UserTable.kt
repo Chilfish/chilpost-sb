@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.json.json
 import java.time.LocalDateTime
 
 object UserTable : IntIdTable("users") {
-    val name = varchar("name", 255)
+    val name = varchar("name", 255).index()
     val nickname = varchar("nickname", 255)
     val password = varchar("password", 255)
     val email = varchar("email", 255)
@@ -16,13 +16,17 @@ object UserTable : IntIdTable("users") {
     val level = varchar("level", 255).default("user")
 
     val deleted = bool("deleted").default(false)
-    val deletedAt = datetime("deleted_at").default(LocalDateTime.now())
+    val deletedAt = datetime("deleted_at").nullable().default(null)
     val createdAt = datetime("created_at").default(LocalDateTime.now())
     val updatedAt = datetime("updated_at").default(LocalDateTime.now())
+
+    init {
+        uniqueIndex(name, email)
+    }
 }
 
 object UserStatusT : IntIdTable("user_status") {
-    val userId = reference("user_id", UserTable.id)
+    val userId = reference("user_id", UserTable.id).index()
     val postCount = integer("post_count").default(0)
     val followerCount = integer("follower_count").default(0)
     val followingCount = integer("following_count").default(0)

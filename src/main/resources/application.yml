@@ -3,11 +3,11 @@ spring:
     generate-ddl: true
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://127.0.0.1:3306/chilpost_sb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
-    username: root
-    password: root
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      initialization-fail-timeout: 5000
+      initialization-fail-timeout: 10000
   mvc:
     problemdetails:
       enabled: true

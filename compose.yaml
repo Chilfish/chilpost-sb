@@ -9,6 +9,8 @@ services:
       - mysql
     environment:
       - MYSQL_URL=jdbc:mysql://mysql:3336/chilpost_sb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      - MYSQL_PASSWORD_FILE=/run/secrets/db-password
+      - MYSQL_USERNAME=root
 
   mysql:
     image: mysql:8.2.0
@@ -22,7 +24,7 @@ services:
     secrets:
       - db-password
     volumes:
-      - db-data:/var/lib/mysql
+      - chilpost-data:/var/lib/mysql
     ports:
       - 4446:3336
     healthcheck:
@@ -31,7 +33,8 @@ services:
       timeout: 5s
       retries: 5
 volumes:
-  db-data:
+  chilpost-data:
+    external: true
 secrets:
   db-password:
     file: password.txt

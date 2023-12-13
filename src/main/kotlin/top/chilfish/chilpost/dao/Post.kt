@@ -17,6 +17,8 @@ fun toPostDetail(it: ResultRow) = mapOf(
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
     "parent_id" to it[parentId],
+    "child_id" to it[PostTable.childId],
+    "media" to it[PostTable.media],
     "owner_id" to it[PostTable.ownerId],
     "status" to mapOf(
         "like_count" to it[PostStatusT.like_count],
