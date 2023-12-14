@@ -9,6 +9,7 @@ import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.PostService
 import top.chilfish.chilpost.utils.response
+import java.util.UUID
 
 @Controller
 @RequestMapping("/api/post")
@@ -34,7 +35,8 @@ class PostController(
         @RequestBody form: NewPost,
         @RequestAttribute("user") user: TokenData
     ): Any {
-        val id = postService.newPost(form.content, user.id, form.meta)
+        val uid = UUID.fromString(user.id)
+        val id = postService.newPost(form.content, uid, form.meta)
         if (id == -1)
             throw newError(ErrorCode.INVALID_ID)
         return response(data = mapOf("id" to id))
@@ -46,7 +48,7 @@ class PostController(
         @RequestAttribute("user") user: TokenData
     ) = response(
         data = mapOf(
-            "id" to postService.likePost(data.id, user.id.toString())
+            "id" to postService.likePost(data.id, user.id)
         )
     )
 

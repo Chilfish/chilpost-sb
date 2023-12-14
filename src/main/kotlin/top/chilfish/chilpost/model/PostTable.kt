@@ -10,15 +10,15 @@ import java.util.*
 
 object PostTable : IntIdTable("posts") {
     val uuid  = uuid("uuid").index()
+    val ownerId = uuid("owner_id").index()
     val content = text("content")
-    val ownerId = integer("owner_id")
     val deleted = bool("deleted").default(false)
     val deletedAt = datetime("deleted_at").nullable().default(null)
     val createdAt = datetime("created_at").default(LocalDateTime.now())
 
     val isBody = bool("is_body").default(true)
-    val parentId = integer("parent_id").default(-1)
-    val childId = integer("child_id").default(-1)
+    val parentId = uuid("parent_id").nullable().default(null)
+    val childId = uuid("child_id").nullable().default(null)
 
     val media = json<Array<String>>("media", Json.Default).default(arrayOf())
 }

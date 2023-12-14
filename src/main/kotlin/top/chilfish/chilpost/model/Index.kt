@@ -2,6 +2,7 @@ package top.chilfish.chilpost.model
 
 import kotlinx.serialization.Serializable
 import top.chilfish.chilpost.error.ErrorCode
+import java.util.*
 
 data class AuthData(val email: String, val password: String)
 
@@ -15,9 +16,9 @@ data class ApiReturn<T>(
 data class UserToken(val token: String, val user: User)
 
 @Serializable
-data class TokenData(val id: Int, val name: String)
+data class TokenData(val id: String, val name: String)
 
-data class NewPostMeta(val type: String, val pcId: String?)
+data class NewPostMeta(val type: String, val pcId: UUID?)
 
 data class NewPost(val content: String, val meta: NewPostMeta)
 

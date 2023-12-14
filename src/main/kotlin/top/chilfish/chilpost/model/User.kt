@@ -13,10 +13,10 @@ data class Owner(
 
 @Serializable
 data class User(
-    val id: Int = 0,
+    val id: String= "",
     val name: String,
     val nickname: String,
-    val password: String,
+    var password: String,
     val email: String,
     val avatar: String = "/placeholder.avatar.png",
     val bio: String = "hello",

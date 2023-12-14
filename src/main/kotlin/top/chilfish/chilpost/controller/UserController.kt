@@ -10,6 +10,7 @@ import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.service.UserService
 import top.chilfish.chilpost.utils.response
+import java.util.*
 
 @Controller
 @RequestMapping("/api/user")
@@ -30,10 +31,17 @@ class UserController(
     @PostMapping("/follow")
     fun follow(
         @RequestAttribute("user") user: TokenData,
-        @RequestBody data: Map<String, Int>
+        @RequestBody data: Map<String, String>
     ): Any {
-        val uid = data["id"] ?: throw newError(ErrorCode.INVALID_PARAM)
-        return response(data = userService.follow(user.id, uid))
+        try {
+            val fid = UUID.fromString(data["id"])
+            val uid = UUID.fromString(user.id)
+
+            return response(data = userService.follow(uid, fid))
+
+        } catch (e: Exception) {
+            throw newError(ErrorCode.INVALID_PARAM)
+        }
     }
 
     @PostMapping("/update")
@@ -43,7 +51,8 @@ class UserController(
     ): Any {
         try {
             val newUser = Json.decodeFromString<User>(data)
-            return response(data = userService.update(user.id, newUser))
+            val uid = UUID.fromString(user.id)
+            return response(data = userService.update(uid, newUser))
         } catch (e: Exception) {
             throw newError(ErrorCode.INVALID_PARAM)
         }
@@ -57,6 +66,7 @@ class UserController(
         if (avatar == null || avatar.isEmpty)
             throw newError(ErrorCode.INVALID_PARAM)
 
-        return response(data = userService.updateAvatar(user.id, avatar))
+        val uid = UUID.fromString(user.id)
+        return response(data = userService.uploadAvatar(uid, avatar))
     }
 }

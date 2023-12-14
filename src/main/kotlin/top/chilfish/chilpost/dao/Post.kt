@@ -10,6 +10,7 @@ import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.PostTable.parentId
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
+import top.chilfish.chilpost.utils.logger
 import java.util.*
 
 fun toPostDetail(it: ResultRow) = mapOf(
@@ -17,10 +18,12 @@ fun toPostDetail(it: ResultRow) = mapOf(
     "content" to it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
+
     "parent_id" to it[parentId],
     "child_id" to it[PostTable.childId],
-    "media" to it[PostTable.media],
     "owner_id" to it[PostTable.ownerId],
+
+    "media" to it[PostTable.media],
     "status" to mapOf(
         "like_count" to it[PostStatusT.like_count],
         "comment_count" to it[PostStatusT.comment_count],
@@ -42,14 +45,14 @@ fun toPostWithOwner(it: ResultRow) = toPostDetail(it).plus(
     )
 )
 
+fun postDetail() = (PostTable innerJoin PostStatusT)
 
-fun postWithOwner() = PostTable
-    .innerJoin(PostStatusT)
+fun postWithOwner() = postDetail()
     .join(
         UserTable,
         JoinType.INNER,
         PostTable.ownerId,
-        UserTable.id
+        UserTable.uuid
     )
 
 fun postQuery() = postWithOwner().selectAll()
@@ -62,7 +65,7 @@ fun getPostByOwner(name: String) = getAllPosts().andWhere { UserTable.name eq na
 fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
 fun getPostByUUId(uuid: UUID) = postQuery().andWhere { PostTable.uuid eq uuid }
 
-fun getCommentsById(pcId: Int) = postQuery()
+fun getCommentsById(pcId: UUID) = postQuery()
     .andWhere { parentId eq pcId }
     .andWhere { PostTable.isBody eq Op.FALSE }
 
@@ -71,12 +74,12 @@ fun getCommentsById(pcId: Int) = postQuery()
  * 插入 posts 表和 post_status 表，更新 users 表的 post_count
  * 如果是评论，还要更新 parent_post 的 comment_count 和 comments
  */
-fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
+fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
     var parentPost: ResultRow? = null
-
+//    logger.info("addPost: $content, $ownerId, $parentId")
     if (parentId != null) {
-        parentPost = PostStatusT
-            .select { post_id eq parentId }
+        parentPost = postDetail()
+            .select { PostTable.uuid eq parentId }
             .firstOrNull() ?: throw MyError(ErrorCode.NOT_FOUND_POST)
     }
 
@@ -100,7 +103,7 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
             .apply { add(id.toString()) }
             .toTypedArray()
 
-        PostStatusT.update({ post_id eq parentId }) {
+        PostStatusT.update({ post_id eq parentPost[PostTable.id] }) {
             with(SqlExpressionBuilder) {
                 it[comment_count] = comment_count + 1
                 it[comments] = commentsArr
@@ -117,8 +120,8 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
     return id
 }
 
-fun canComment(parentId: Int) = postWithOwner()
-    .select { PostTable.id eq parentId }
+fun canComment(parentId: UUID) = postWithOwner()
+    .select { PostTable.uuid eq parentId }
     .firstOrNull() != null
 
 

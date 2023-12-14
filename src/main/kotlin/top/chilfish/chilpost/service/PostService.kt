@@ -18,7 +18,7 @@ class PostService {
         )
     }
 
-    fun getById(id: String): MutableMap<String, Any>? {
+    fun getById(id: String): MutableMap<String, Any?>? {
         val uuid = UUID.fromString(id)
 
         val post = getPostByUUId(uuid).map(::toPostWithOwner)
@@ -26,7 +26,7 @@ class PostService {
             ?: return null
 
         if (post["parent_id"] != -1) {
-            val parent = getPostById(post["parent_id"] as Int)
+            val parent = getPostByUUId(post["parent_id"] as UUID)
                 .map(::toPostWithOwner).firstOrNull() ?: return null
 
             post["parent_post"] = parent
@@ -36,9 +36,10 @@ class PostService {
     }
 
     fun getComments(pcId: String): Map<String, Any> {
-        val comments = pcId.toIntOrNull()?.let {
-            getCommentsById(it).map(::toPostWithOwner)
-        } ?: emptyList()
+        val uuid = UUID.fromString(pcId)
+
+        val comments = getCommentsById(uuid).map(::toPostWithOwner)
+
 
         return mapOf(
             "comments" to comments,
@@ -46,10 +47,10 @@ class PostService {
         )
     }
 
-    fun newPost(content: String, ownerId: Int, meta: NewPostMeta): Int {
+    fun newPost(content: String, ownerId: UUID, meta: NewPostMeta): Int {
 //        logger.info("newPost: $content, $ownerId, $meta")
 
-        if (meta.type == "comment")
+        if (meta.type == "comment" && meta.pcId != null)
             return newComment(content, ownerId, meta.pcId)
 
         if (meta.type != "post")
@@ -58,13 +59,11 @@ class PostService {
         return addPost(content, ownerId)
     }
 
-    fun newComment(content: String, ownerId: Int, parentId: String?): Int {
-        val pid = parentId?.toIntOrNull() ?: return -1
-
-        if (!canComment(pid))
+    fun newComment(content: String, ownerId: UUID, parentId: UUID): Int {
+        if (!canComment(parentId))
             return -1
 
-        return addPost(content, ownerId, pid)
+        return addPost(content, ownerId, parentId)
     }
 
 

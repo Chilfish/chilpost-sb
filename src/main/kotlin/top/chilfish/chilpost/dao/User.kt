@@ -11,7 +11,7 @@ import top.chilfish.chilpost.model.UserTable
 import java.util.*
 
 fun toUserDetail(it: ResultRow) = mapOf(
-    "id" to it[UserTable.id].value,
+    "id" to it[UserTable.uuid].toString(),
     "name" to it[UserTable.name],
     "nickname" to it[UserTable.nickname],
     "email" to it[UserTable.email],
@@ -19,7 +19,6 @@ fun toUserDetail(it: ResultRow) = mapOf(
     "avatar" to it[UserTable.avatar],
     "bio" to it[UserTable.bio],
     "level" to it[UserTable.level],
-    "uuid" to it[UserTable.uuid].toString(),
 //    "deleted" to it[UserTable.deleted],
 //    "createdAt" to it[UserTable.createdAt],
     "status" to mapOf(
@@ -44,12 +43,13 @@ fun getUserDetail(name: String): MutableMap<String, Any> {
     return res
 }
 
-fun getUserByEmail(email: String) = (UserTable innerJoin UserStatusT)
-    .select { UserTable.email eq email }
-    .map(::toUserDetail)
-    .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
+fun userDetail() = (UserTable innerJoin UserStatusT)
 
-fun addUser(name: String, nickname: String, email: String, password: String): Int {
+fun getUserById(id: Int) = userDetail().select { UserTable.id eq id }
+fun getUserByUUId(uuid: UUID) = userDetail().select { UserTable.uuid eq uuid }
+fun getUserByEmail(email: String) = userDetail().select { UserTable.email eq email }
+
+fun addUser(name: String, nickname: String, email: String, password: String): UUID {
     val id = UserTable
         .insertAndGetId {
             it[UserTable.name] = name
@@ -61,13 +61,18 @@ fun addUser(name: String, nickname: String, email: String, password: String): In
 
     UserStatusT.insert { it[userId] = id }
 
-    return id
+    val uuid = getUserById(id).first()[UserTable.uuid]
+    return uuid
 }
 
-fun toggleFollow(uid: String, fid: String): Int {
-    val me = UserStatusT.select { UserStatusT.userId eq uid.toInt() }.first()
-    val other = UserStatusT.select { UserStatusT.userId eq fid.toInt() }.firstOrNull()
+fun toggleFollow(uidUU: UUID, fidUU: UUID): Int {
+    val me = userDetail().select { UserTable.uuid eq uidUU }.first()
+
+    val other = userDetail().select { UserTable.uuid eq fidUU }.firstOrNull()
         ?: throw newError(ErrorCode.NOT_FOUND_USER)
+
+    val uid = me[UserTable.id].value.toString()
+    val fid = other[UserTable.id].value.toString()
 
     val myFollowings = me[followings].toMutableList() // 我的关注列表
     val otherFollowers = other[followers].toMutableList() // 对方的粉丝列表
@@ -93,8 +98,8 @@ fun toggleFollow(uid: String, fid: String): Int {
     return res1 + res2
 }
 
-fun updateUser(uid: Int, newUser: User) =
-    UserTable.update({ UserTable.id eq uid }) {
+fun updateUser(uid: UUID, newUser: User) =
+    UserTable.update({ UserTable.uuid eq uid }) {
         it[name] = newUser.name
         it[nickname] = newUser.nickname
         it[email] = newUser.email
@@ -105,9 +110,7 @@ fun updateUser(uid: Int, newUser: User) =
         // it[level] = newUser.level
     }
 
-fun updateAvatar(uid: Int, avatar: String) =
-    UserTable.update({ UserTable.id eq uid }) {
+fun updateAvatar(uid: UUID, avatar: String) =
+    UserTable.update({ UserTable.uuid eq uid }) {
         it[UserTable.avatar] = avatar
     }
-
-fun getUser(uid: Int) = UserTable.select { UserTable.id eq uid }.firstOrNull()
