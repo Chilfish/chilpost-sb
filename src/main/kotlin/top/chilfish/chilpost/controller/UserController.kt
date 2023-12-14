@@ -3,6 +3,7 @@ package top.chilfish.chilpost.controller
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
@@ -46,5 +47,16 @@ class UserController(
         } catch (e: Exception) {
             throw newError(ErrorCode.INVALID_PARAM)
         }
+    }
+
+    @PostMapping("/update/avatar")
+    fun updateAvatar(
+        @RequestAttribute("user") user: TokenData,
+        @RequestParam("avatar") avatar: MultipartFile?
+    ): Any {
+        if (avatar == null || avatar.isEmpty)
+            throw newError(ErrorCode.INVALID_PARAM)
+
+        return response(data = userService.updateAvatar(user.id, avatar))
     }
 }

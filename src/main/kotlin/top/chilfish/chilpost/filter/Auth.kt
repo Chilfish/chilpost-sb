@@ -53,7 +53,6 @@ class AuthFilter : Filter {
             chain.doFilter(request, response)
         } catch (e: Exception) {
 //            logger.info("AuthFilter: $e")
-
             req.setAttribute("filter.error", e)
             req.getRequestDispatcher("/err/filter").forward(req, res)
         }

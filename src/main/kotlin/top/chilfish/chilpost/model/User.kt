@@ -1,6 +1,7 @@
 package top.chilfish.chilpost.model
 
 import kotlinx.serialization.Serializable
+import java.util.*
 
 @Serializable
 data class Owner(
@@ -20,6 +21,8 @@ data class User(
     val avatar: String = "/placeholder.avatar.png",
     val bio: String = "hello",
     val level: String = "user",
+
+    val uuid: String = UUID.randomUUID().toString(),
 
 //    val created_at: String = LocalDateTime.now().toString(),
 //    val deleted: Boolean = false,

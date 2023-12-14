@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.json.json
 import java.time.LocalDateTime
 
 object UserTable : IntIdTable("users") {
+    val uuid  = uuid("uuid").index()
     val name = varchar("name", 255).index()
     val nickname = varchar("nickname", 255)
     val password = varchar("password", 255)

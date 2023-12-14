@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.model.NewPostMeta
+import java.util.UUID
 
 @Service
 @Transactional
@@ -18,10 +19,11 @@ class PostService {
     }
 
     fun getById(id: String): MutableMap<String, Any>? {
-        val post = id.toIntOrNull()?.let {
-            getPostById(it).map(::toPostWithOwner).firstOrNull()?.toMutableMap()
-        } ?: return null
+        val uuid = UUID.fromString(id)
 
+        val post = getPostByUUId(uuid).map(::toPostWithOwner)
+            .firstOrNull()?.toMutableMap()
+            ?: return null
 
         if (post["parent_id"] != -1) {
             val parent = getPostById(post["parent_id"] as Int)

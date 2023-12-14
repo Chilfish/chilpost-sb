@@ -2,6 +2,7 @@ package top.chilfish.chilpost.model
 
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
+import java.util.*
 
 @Serializable
 data class Post(
@@ -10,6 +11,8 @@ data class Post(
     val id: Int = 0,
     val isBody: Boolean = true,
     val parentId: Int = -1,
+
+    val uuid: String = UUID.randomUUID().toString(),
 
     val deleted: Boolean = false,
     val deletedAt: String,

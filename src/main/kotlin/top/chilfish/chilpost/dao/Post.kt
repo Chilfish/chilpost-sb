@@ -10,9 +10,10 @@ import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.PostTable.parentId
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
+import java.util.*
 
 fun toPostDetail(it: ResultRow) = mapOf(
-    "id" to it[PostTable.id].value,
+    "id" to it[PostTable.uuid].toString(),
     "content" to it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
@@ -59,6 +60,7 @@ fun getAllPosts() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
 fun getPostByOwner(name: String) = getAllPosts().andWhere { UserTable.name eq name }
 
 fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
+fun getPostByUUId(uuid: UUID) = postQuery().andWhere { PostTable.uuid eq uuid }
 
 fun getCommentsById(pcId: Int) = postQuery()
     .andWhere { parentId eq pcId }
@@ -81,6 +83,7 @@ fun addPost(content: String, ownerId: Int, parentId: Int? = null): Int {
     val id = PostTable.insertAndGetId {
         it[PostTable.content] = content
         it[PostTable.ownerId] = ownerId
+        it[uuid] = UUID.randomUUID()
 
         if (parentId != null) {
             it[PostTable.parentId] = parentId

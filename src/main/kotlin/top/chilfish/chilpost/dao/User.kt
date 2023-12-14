@@ -8,6 +8,7 @@ import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserStatusT.followers
 import top.chilfish.chilpost.model.UserStatusT.followings
 import top.chilfish.chilpost.model.UserTable
+import java.util.*
 
 fun toUserDetail(it: ResultRow) = mapOf(
     "id" to it[UserTable.id].value,
@@ -18,6 +19,7 @@ fun toUserDetail(it: ResultRow) = mapOf(
     "avatar" to it[UserTable.avatar],
     "bio" to it[UserTable.bio],
     "level" to it[UserTable.level],
+    "uuid" to it[UserTable.uuid].toString(),
 //    "deleted" to it[UserTable.deleted],
 //    "createdAt" to it[UserTable.createdAt],
     "status" to mapOf(
@@ -54,6 +56,7 @@ fun addUser(name: String, nickname: String, email: String, password: String): In
             it[UserTable.nickname] = nickname
             it[UserTable.password] = password
             it[UserTable.email] = email
+            it[uuid] = UUID.randomUUID()
         }.value
 
     UserStatusT.insert { it[userId] = id }
@@ -101,3 +104,10 @@ fun updateUser(uid: Int, newUser: User) =
         // TODO: admin only
         // it[level] = newUser.level
     }
+
+fun updateAvatar(uid: Int, avatar: String) =
+    UserTable.update({ UserTable.id eq uid }) {
+        it[UserTable.avatar] = avatar
+    }
+
+fun getUser(uid: Int) = UserTable.select { UserTable.id eq uid }.firstOrNull()

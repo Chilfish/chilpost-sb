@@ -4,9 +4,12 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.json.json
+import top.chilfish.chilpost.model.UserTable.default
 import java.time.LocalDateTime
+import java.util.*
 
 object PostTable : IntIdTable("posts") {
+    val uuid  = uuid("uuid").index()
     val content = text("content")
     val ownerId = integer("owner_id")
     val deleted = bool("deleted").default(false)
