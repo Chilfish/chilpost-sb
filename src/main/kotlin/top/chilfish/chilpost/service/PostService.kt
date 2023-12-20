@@ -12,8 +12,9 @@ import java.util.UUID
 @Service
 @Transactional
 class PostService {
-    fun getAll(): Map<String, Any> {
-        val posts = getAllPosts().map(::toPostWithOwner)
+    fun getAll(uid: String?): Map<String, Any> {
+        val userId = getUserId(uid)
+        val posts = getAllPosts().map { toPostWithOwner(it, userId) }
 
         return mapOf(
             "posts" to posts,
@@ -21,16 +22,17 @@ class PostService {
         )
     }
 
-    fun getById(id: String): MutableMap<String, Any?>? {
+    fun getById(id: String, uid: String?): MutableMap<String, Any?>? {
         val uuid = UUID.fromString(id)
+        val userId = getUserId(uid)
 
-        val post = getPostByUUId(uuid).map(::toPostWithOwner)
+        val post = getPostByUUId(uuid).map { toPostWithOwner(it, userId) }
             .firstOrNull()?.toMutableMap()
             ?: return null
 
         if (post["parent_id"] != null) {
             val parent = getPostByUUId(post["parent_id"] as UUID)
-                .map(::toPostWithOwner).firstOrNull() ?: return null
+                .map { toPostWithOwner(it, userId) }.firstOrNull() ?: return null
 
             post["parent_post"] = parent
         }

@@ -13,9 +13,10 @@ import java.util.UUID
 class UserService {
     fun getByName(name: String) = getUserDetail(name)
 
-    fun userHome(name: String): Any {
+    fun userHome(name: String, uid: String?): Any {
         val user = getByName(name)
-        val posts = getPostByOwner(name).map(::toPostWithOwner)
+        val userId = getUserId(uid)
+        val posts = getPostByOwner(name).map { toPostWithOwner(it, userId) }
 
         return mapOf(
             "owner" to user,

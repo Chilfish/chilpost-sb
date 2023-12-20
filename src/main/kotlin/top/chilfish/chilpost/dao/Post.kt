@@ -14,7 +14,7 @@ import top.chilfish.chilpost.model.UserTable
 import top.chilfish.chilpost.utils.logger
 import java.util.*
 
-fun toPostDetail(it: ResultRow) = mapOf(
+fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
     "id" to it[PostTable.uuid].toString(),
     "content" to it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
@@ -26,16 +26,16 @@ fun toPostDetail(it: ResultRow) = mapOf(
 
     "media" to it[PostTable.media],
     "status" to mapOf(
-        "like_count" to it[PostStatusT.like_count],
+        "is_liked" to isLiked(it[PostTable.id].value, uid),
+        "like_count" to it[like_count],
         "comment_count" to it[PostStatusT.comment_count],
         "repost_count" to it[PostStatusT.repost_count],
-        "likes" to it[likes],
         "comments" to it[PostStatusT.comments],
         "reposts" to it[PostStatusT.reposts],
     ),
 )
 
-fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it)
+fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid)
     .plus(
         mapOf(
             "owner" to mapOf(
@@ -44,11 +44,6 @@ fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it)
                 "nickname" to it[UserTable.nickname],
                 "avatar" to it[UserTable.avatar],
             ),
-        )
-    )
-    .plus(
-        mapOf(
-            "is_liked" to isLiked(it[PostTable.id].value, uid),
         )
     )
 
@@ -169,8 +164,6 @@ fun isLiked(pid: Int, uid: Int): Boolean {
     val likesArr = PostStatusT
         .select { post_id eq pid }
         .first()[likes]
-
-    logger.info("likesArr: $likesArr")
 
     return likesArr.contains(uid.toString())
 }
