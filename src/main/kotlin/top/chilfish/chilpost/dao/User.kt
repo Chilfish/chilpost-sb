@@ -49,6 +49,8 @@ fun getUserById(id: Int) = userDetail().select { UserTable.id eq id }
 fun getUserByUUId(uuid: UUID) = userDetail().select { UserTable.uuid eq uuid }
 fun getUserByEmail(email: String) = userDetail().select { UserTable.email eq email }
 
+fun getUserId(id: UUID) = getUserByUUId(id).firstOrNull()?.get(UserStatusT.userId)?.value
+
 fun addUser(name: String, nickname: String, email: String, password: String): UUID {
     val id = UserTable
         .insertAndGetId {

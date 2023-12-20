@@ -4,6 +4,7 @@ import org.jetbrains.exposed.sql.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.MyError
 import top.chilfish.chilpost.model.PostStatusT
+import top.chilfish.chilpost.model.PostStatusT.like_count
 import top.chilfish.chilpost.model.PostStatusT.likes
 import top.chilfish.chilpost.model.PostStatusT.post_id
 import top.chilfish.chilpost.model.PostTable
@@ -34,16 +35,22 @@ fun toPostDetail(it: ResultRow) = mapOf(
     ),
 )
 
-fun toPostWithOwner(it: ResultRow) = toPostDetail(it).plus(
-    mapOf(
-        "owner" to mapOf(
-            "id" to it[UserTable.id].value,
-            "name" to it[UserTable.name],
-            "nickname" to it[UserTable.nickname],
-            "avatar" to it[UserTable.avatar],
-        ),
+fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it)
+    .plus(
+        mapOf(
+            "owner" to mapOf(
+                "id" to it[UserTable.id].value,
+                "name" to it[UserTable.name],
+                "nickname" to it[UserTable.nickname],
+                "avatar" to it[UserTable.avatar],
+            ),
+        )
     )
-)
+    .plus(
+        mapOf(
+            "is_liked" to isLiked(it[PostTable.id].value, uid),
+        )
+    )
 
 fun postDetail() = (PostTable innerJoin PostStatusT)
 
@@ -64,6 +71,8 @@ fun getPostByOwner(name: String) = getAllPosts().andWhere { UserTable.name eq na
 
 fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
 fun getPostByUUId(uuid: UUID) = postQuery().andWhere { PostTable.uuid eq uuid }
+
+fun getPostId(id: UUID) = getPostByUUId(id).firstOrNull()?.get(PostTable.id)?.value
 
 fun getCommentsById(pcId: UUID) = postQuery()
     .andWhere { parentId eq pcId }
@@ -126,11 +135,13 @@ fun canComment(parentId: UUID) = postWithOwner()
 
 
 fun toggleLikePost(pid: Int, uid: Int): Int {
+    // Retrieve the current likes of the post
     val likesArr = PostStatusT
         .select { post_id eq pid }
         .first()[likes]
         .toMutableList()
 
+    // Initialize the variable to track the change in like count
     var added = 1
 
     if (likesArr.contains(uid.toString())) {
@@ -140,12 +151,26 @@ fun toggleLikePost(pid: Int, uid: Int): Int {
         likesArr.add(uid.toString())
     }
 
-    val rows = PostStatusT.update({ post_id eq pid }) {
+    PostStatusT.update({ post_id eq pid }) {
         with(SqlExpressionBuilder) {
             it[like_count] = like_count + added
             it[likes] = likesArr.toTypedArray()
         }
     }
 
-    return rows
+    val likes = PostStatusT.select { post_id eq pid }.first()[like_count]
+
+    return likes
+}
+
+fun isLiked(pid: Int, uid: Int): Boolean {
+    if (uid == -1) return false
+
+    val likesArr = PostStatusT
+        .select { post_id eq pid }
+        .first()[likes]
+
+    logger.info("likesArr: $likesArr")
+
+    return likesArr.contains(uid.toString())
 }

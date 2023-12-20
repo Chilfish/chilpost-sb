@@ -9,7 +9,7 @@ import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.PostService
 import top.chilfish.chilpost.utils.response
-import java.util.UUID
+import java.util.*
 
 @Controller
 @RequestMapping("/api/post")
@@ -48,7 +48,7 @@ class PostController(
         @RequestAttribute("user") user: TokenData
     ) = response(
         data = mapOf(
-            "id" to postService.likePost(data.id, user.id)
+            "count" to postService.likePost(data.id, user.id)
         )
     )
 

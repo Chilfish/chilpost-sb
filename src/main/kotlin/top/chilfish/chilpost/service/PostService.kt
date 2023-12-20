@@ -3,7 +3,10 @@ package top.chilfish.chilpost.service
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.*
+import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.NewPostMeta
+import top.chilfish.chilpost.model.UserStatusT.userId
 import java.util.UUID
 
 @Service
@@ -25,7 +28,7 @@ class PostService {
             .firstOrNull()?.toMutableMap()
             ?: return null
 
-        if (post["parent_id"] != -1) {
+        if (post["parent_id"] != null) {
             val parent = getPostByUUId(post["parent_id"] as UUID)
                 .map(::toPostWithOwner).firstOrNull() ?: return null
 
@@ -68,14 +71,13 @@ class PostService {
 
 
     fun likePost(pid: String, uid: String): Int {
-        val postId = pid.toIntOrNull()
-        val userId = uid.toIntOrNull()
+        val postId = getPostId(UUID.fromString(pid))
+        val userId = getUserId(UUID.fromString(uid))
 
-        return if (postId != null && userId != null) {
-            toggleLikePost(postId, userId)
-        } else {
-            -1
-        }
+        if (postId == null || userId == null)
+            throw newError(ErrorCode.INVALID_PARAM)
+
+        return toggleLikePost(postId, userId)
     }
 
     fun test(name: String) = getPostByOwner(name)
