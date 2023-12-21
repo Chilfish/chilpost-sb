@@ -21,4 +21,22 @@ class GlobalExceptionHandler :
         }
         return response(ex.code, ex.statusCode, ex.message, null)
     }
+
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalStateException(ex: IllegalStateException): ResponseEntity<ApiReturn<Nothing?>> {
+        val msg = ex.message ?: "IllegalStateException"
+
+        val missingParams = Regex("Optional (.+) parameter '(.+)' is present")
+            .find(msg)?.groupValues
+
+        if (missingParams != null)
+            return response(
+                ErrorCode.MISSING_PARAM,
+                400,
+                "Missing param: ${missingParams[1]}: ${missingParams[2]}",
+                null
+            )
+
+        return response(ErrorCode.INVALID_PARAM, 400, ex.toString(), null)
+    }
 }

@@ -11,7 +11,6 @@ import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.PostTable.parentId
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
-import top.chilfish.chilpost.utils.logger
 import java.util.*
 
 fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
@@ -60,9 +59,13 @@ fun postWithOwner() = postDetail()
 fun postQuery() = postWithOwner().selectAll()
     .orderBy(PostTable.createdAt to SortOrder.DESC)
 
-fun getAllPosts() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
+fun getPostBody() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
 
-fun getPostByOwner(name: String) = getAllPosts().andWhere { UserTable.name eq name }
+fun getAllPosts(page: Int, size: Int) = getPostBody()
+    .limit(size, ((page - 1) * size).toLong())
+
+fun getPostByOwner(name: String, page: Int, size: Int) = getAllPosts(page, size)
+    .andWhere { UserTable.name eq name }
 
 fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
 fun getPostByUUId(uuid: UUID) = postQuery().andWhere { PostTable.uuid eq uuid }
@@ -72,6 +75,8 @@ fun getPostId(id: UUID) = getPostByUUId(id).firstOrNull()?.get(PostTable.id)?.va
 fun getCommentsById(pcId: UUID) = postQuery()
     .andWhere { parentId eq pcId }
     .andWhere { PostTable.isBody eq Op.FALSE }
+
+fun getPageCount(size: Int) = (getPostBody().count() / size) + 1
 
 /**
  * 新增一篇帖子或是评论，返回帖子详情

@@ -6,19 +6,20 @@ import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.NewPostMeta
-import top.chilfish.chilpost.model.UserStatusT.userId
-import java.util.UUID
+import java.util.*
 
 @Service
 @Transactional
 class PostService {
-    fun getAll(uid: String?): Map<String, Any> {
+    fun getAll(uid: String?, page: Int, size: Int): Map<String, Any> {
         val userId = getUserId(uid)
-        val posts = getAllPosts().map { toPostWithOwner(it, userId) }
+        val posts = getAllPosts(page, size).map { toPostWithOwner(it, userId) }
+        val pages = getPageCount(size)
 
         return mapOf(
             "posts" to posts,
-            "count" to posts.size
+            "count" to posts.size,
+            "pages" to pages,
         )
     }
 
@@ -91,6 +92,4 @@ class PostService {
 
         return toggleLikePost(postId, userId)
     }
-
-    fun test(name: String) = getPostByOwner(name)
 }

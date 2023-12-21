@@ -25,8 +25,10 @@ class UserController(
     @GetMapping("/@/{name}")
     fun userHome(
         @PathVariable name: String,
-        @RequestParam uid: String?
-    ) = response(data = userService.userHome(name, uid))
+        @RequestParam uid: String?,
+        @RequestParam page: Int = 0,
+        @RequestParam size: Int = 16,
+    ) = response(data = userService.userHome(name, uid, page, size))
 
 
     @PostMapping("/follow")

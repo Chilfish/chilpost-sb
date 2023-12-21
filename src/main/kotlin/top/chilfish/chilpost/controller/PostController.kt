@@ -2,6 +2,7 @@ package top.chilfish.chilpost.controller
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import top.chilfish.chilpost.PAGE_SIZE
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.IdJson
@@ -19,8 +20,10 @@ class PostController(
 
     @GetMapping("/all")
     fun all(
-        @RequestParam uid: String?
-    ) = response(data = postService.getAll(uid))
+        @RequestParam uid: String?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
+    ) = response(data = postService.getAll(uid, page, size))
 
     @GetMapping("/get")
     fun getById(
@@ -60,9 +63,4 @@ class PostController(
             "count" to postService.likePost(data.id, user.id)
         )
     )
-
-    @GetMapping("/test/{name}")
-    fun test(
-        @PathVariable name: String
-    ) = response(data = postService.test(name))
 }

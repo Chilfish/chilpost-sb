@@ -13,15 +13,16 @@ import java.util.*
 class UserService {
     fun getByName(name: String) = getUserDetail(name)
 
-    fun userHome(name: String, ctxUuidStr: String?): Any {
+    fun userHome(name: String, ctxUuidStr: String?, page: Int, size: Int): Any {
         val ctxUid = getUserId(ctxUuidStr)
         val user = getUserDetail(name, ctxUid)
-        val posts = getPostByOwner(name).map { toPostWithOwner(it, ctxUid) }
+        val posts = getPostByOwner(name, page, size).map { toPostWithOwner(it, ctxUid) }
 
         return mapOf(
             "owner" to user,
             "posts" to posts,
-            "count" to posts.size
+            "count" to posts.size,
+            "pages" to getPageCount(size),
         )
     }
 
