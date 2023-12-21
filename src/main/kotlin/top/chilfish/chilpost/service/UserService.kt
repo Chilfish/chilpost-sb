@@ -5,8 +5,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.model.User
-import top.chilfish.chilpost.utils.uploadFile
-import java.util.UUID
+import top.chilfish.chilpost.utils.uploadImage
+import java.util.*
 
 @Service
 @Transactional
@@ -33,7 +33,7 @@ class UserService {
     fun update(uid: UUID, newUser: User) = updateUser(uid, newUser)
 
     fun uploadAvatar(uid: UUID, avatar: MultipartFile): String {
-        val avatarUrl = uploadFile(avatar, "avatars", "user_$uid.png")
+        val avatarUrl = uploadImage(avatar, "avatars", "user_$uid.png")
         updateAvatar(uid, avatarUrl)
         return avatarUrl
     }

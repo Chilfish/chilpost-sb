@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.web.servlet.ServletComponentScan
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import top.chilfish.chilpost.utils.initFileDir
+import top.chilfish.chilpost.utils.logger
 
 @SpringBootApplication
 @ServletComponentScan
@@ -15,11 +17,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
     exclude = [DataSourceTransactionManagerAutoConfiguration::class]
 )
 class ChilpostApplication : SpringBootServletInitializer() {
-
     override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
         return application.sources(ChilpostApplication::class.java)
     }
-
 }
 
 fun configureApplication(builder: SpringApplicationBuilder): SpringApplicationBuilder {
@@ -28,5 +28,8 @@ fun configureApplication(builder: SpringApplicationBuilder): SpringApplicationBu
 
 fun main(args: Array<String>) {
     configureApplication(SpringApplicationBuilder()).run(*args)
+
+    logger.info("ChilpostApplication started")
+    initFileDir()
 }
 

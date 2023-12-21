@@ -3,6 +3,8 @@ package top.chilfish.chilpost.error
 enum class ErrorCode {
     OK,
     UNKNOWN_ERROR,
+    NOT_FOUND,
+
     NOT_FOUND_USER,
     NOT_FOUND_POST,
     NOT_FOUND_COMMENT,
@@ -22,6 +24,10 @@ data class MyError(
 ) : Exception()
 
 val Errors = listOf(
+    MyError(ErrorCode.OK, 200, "OK"),
+    MyError(ErrorCode.UNKNOWN_ERROR, 500, "Internal Server Error"),
+    MyError(ErrorCode.NOT_FOUND, 404, "Not Found"),
+
     MyError(ErrorCode.NOT_FOUND_USER, 404, "User not found"),
     MyError(ErrorCode.NOT_FOUND_POST, 404, "Post not found"),
     MyError(ErrorCode.NOT_FOUND_COMMENT, 404, "Comment not found"),

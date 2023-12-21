@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
+import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)
@@ -24,7 +25,8 @@ class AuthFilter : Filter {
         "/post/search",
         "/user/@/.+",
         "/user/test/.+",
-        "/post/test/.+"
+        "/post/test/.+",
+        "/files"
     )
 
     override fun doFilter(
@@ -34,6 +36,7 @@ class AuthFilter : Filter {
     ) {
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
+
         val path = req.requestURI.substring(req.contextPath.length).replace("/api", "")
 
 //        logger.info("AuthFilter: $path isInWhiteList ${isInWhiteList(path)}")
