@@ -14,6 +14,7 @@ import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserToken
 import top.chilfish.chilpost.utils.getToken
+import java.util.*
 
 @Service
 @Transactional
@@ -43,7 +44,7 @@ class AuthService {
     }
 
     fun register(data: AuthData): UserToken {
-        val name = data.email.substringBefore('@')
+        val name = data.email.substringBefore('@') + Date().time
 
         try {
             val user = User(name = name, nickname = name, email = data.email, password = data.password)

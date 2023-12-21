@@ -21,6 +21,7 @@ class AuthFilter : Filter {
         "/post/all",
         "/post/get",
         "/post/comments",
+        "/post/search",
         "/user/@/.+",
         "/user/test/.+",
         "/post/test/.+"

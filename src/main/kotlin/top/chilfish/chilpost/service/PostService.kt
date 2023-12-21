@@ -52,6 +52,16 @@ class PostService {
         )
     }
 
+    fun search(keyword: String, uid: String?): Map<String, Any> {
+        val userId = getUserId(uid)
+        val posts = searchPosts(keyword).map { toPostWithOwner(it, userId) }
+
+        return mapOf(
+            "posts" to posts,
+            "count" to posts.size
+        )
+    }
+
     fun newPost(content: String, ownerId: UUID, meta: NewPostMeta): Int {
 //        logger.info("newPost: $content, $ownerId, $meta")
 

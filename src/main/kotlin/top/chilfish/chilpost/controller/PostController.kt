@@ -33,6 +33,12 @@ class PostController(
         @RequestParam id: String
     ) = response(data = postService.getComments(id))
 
+    @GetMapping("search")
+    fun search(
+        @RequestParam q: String,
+        @RequestParam uid: String?
+    ) = response(data = postService.search(q, uid))
+
     @PostMapping("/new")
     fun newPost(
         @RequestBody form: NewPost,

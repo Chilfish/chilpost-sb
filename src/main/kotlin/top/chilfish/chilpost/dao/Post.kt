@@ -167,3 +167,7 @@ fun isLiked(pid: Int, uid: Int): Boolean {
 
     return likesArr.contains(uid.toString())
 }
+
+fun searchPosts(keyword: String) = postQuery()
+    .andWhere { PostTable.content like "%$keyword%" }
+    .andWhere { PostTable.isBody eq Op.TRUE }
