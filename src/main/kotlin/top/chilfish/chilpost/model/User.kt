@@ -22,7 +22,7 @@ data class User(
     val bio: String = "hello",
     val level: String = "user",
 
-    val uuid: String = UUID.randomUUID().toString(),
+//    val uuid: String = UUID.randomUUID().toString(),
 
 //    val created_at: String = LocalDateTime.now().toString(),
 //    val deleted: Boolean = false,

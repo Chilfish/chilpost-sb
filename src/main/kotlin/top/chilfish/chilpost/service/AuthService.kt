@@ -18,28 +18,27 @@ import top.chilfish.chilpost.utils.getToken
 @Service
 @Transactional
 class AuthService {
-    fun userWithToken(user: User): UserToken {
-        val token = getToken(TokenData(user.uuid, user.name))
+    private val gson = Gson()
 
-        return UserToken(token, user.copy(password = "******", id = user.uuid))
+    fun userWithToken(user: User): UserToken {
+        val token = getToken(TokenData(user.id, user.name))
+
+        return UserToken(token, user)
     }
 
     fun login(data: AuthData): UserToken {
-        val user = (getUserByEmail(data.email)
-            .map(::toUserDetail)
-            .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)).toMutableMap()
+        val user = (
+                getUserByEmail(data.email)
+                    .map(::toUserDetail)
+                    .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
+                ).toMutableMap()
 
         if (user["password"] != data.password)
             throw newError(ErrorCode.INVALID_LOGIN)
 
-        user["uuid"] = user["id"] as Any
-        user["id"] = 0
+        user["password"] = "******"
 
-        val gson = Gson()
-
-//        logger.info(gson.toJson(user))
         val u = gson.fromJson(gson.toJson(user), User::class.java)
-
         return userWithToken(u)
     }
 
@@ -48,9 +47,9 @@ class AuthService {
 
         try {
             val user = User(name = name, nickname = name, email = data.email, password = data.password)
-            val uid = addUser(name, name, data.email, data.password)
+            val uuid = addUser(name, name, data.email, data.password)
 
-            return userWithToken(user.copy(uuid = uid.toString()))
+            return userWithToken(user.copy(id = uuid.toString()))
         } catch (e: ExposedSQLException) {
             if (e.message?.contains("Duplicate entry") == true)
                 throw newError(ErrorCode.EXISTED_USER)

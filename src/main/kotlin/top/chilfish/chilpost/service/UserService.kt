@@ -13,10 +13,10 @@ import java.util.UUID
 class UserService {
     fun getByName(name: String) = getUserDetail(name)
 
-    fun userHome(name: String, uid: String?): Any {
-        val user = getByName(name)
-        val userId = getUserId(uid)
-        val posts = getPostByOwner(name).map { toPostWithOwner(it, userId) }
+    fun userHome(name: String, ctxUuidStr: String?): Any {
+        val ctxUid = getUserId(ctxUuidStr)
+        val user = getUserDetail(name, ctxUid)
+        val posts = getPostByOwner(name).map { toPostWithOwner(it, ctxUid) }
 
         return mapOf(
             "owner" to user,
@@ -25,7 +25,10 @@ class UserService {
         )
     }
 
-    fun follow(uid: UUID, fid: UUID) = toggleFollow(uid, fid)
+    fun follow(uid: UUID, fid: UUID) = mapOf(
+        "count" to toggleFollow(uid, fid)
+    )
+
 
     fun update(uid: UUID, newUser: User) = updateUser(uid, newUser)
 
