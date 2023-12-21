@@ -25,6 +25,13 @@ class PostController(
         @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
     ) = response(data = postService.getAll(uid, page, size))
 
+    @GetMapping("/feed")
+    fun feed(
+        @RequestAttribute("user") user: TokenData,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
+    ) = response(data = postService.getFeed(user.id, page, size))
+
     @GetMapping("/get")
     fun getById(
         @RequestParam id: String,

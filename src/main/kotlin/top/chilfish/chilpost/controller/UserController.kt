@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import top.chilfish.chilpost.PAGE_SIZE
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
@@ -26,8 +27,8 @@ class UserController(
     fun userHome(
         @PathVariable name: String,
         @RequestParam uid: String?,
-        @RequestParam page: Int = 0,
-        @RequestParam size: Int = 16,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
     ) = response(data = userService.userHome(name, uid, page, size))
 
 

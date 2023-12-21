@@ -30,7 +30,6 @@ class UserService {
         "count" to toggleFollow(uid, fid)
     )
 
-
     fun update(uid: UUID, newUser: User) = updateUser(uid, newUser)
 
     fun uploadAvatar(uid: UUID, avatar: MultipartFile): String {

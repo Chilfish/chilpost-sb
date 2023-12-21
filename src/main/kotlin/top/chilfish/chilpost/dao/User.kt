@@ -57,6 +57,9 @@ fun getUserByName(name: String) = userDetail().select { UserTable.name eq name }
 fun getUserId(uuid: UUID) = getUserByUUId(uuid).firstOrNull()?.get(UserStatusT.userId)?.value
 fun getUserId(uuidStr: String?) = if (uuidStr == null) -1 else getUserId(UUID.fromString(uuidStr)) ?: -1
 
+fun getFollowersList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid }.first()[followers].toList()
+fun getFollowingsList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid }.first()[followings].toList()
+
 fun addUser(name: String, nickname: String, email: String, password: String): UUID {
     val id = UserTable
         .insertAndGetId {

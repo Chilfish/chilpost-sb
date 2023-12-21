@@ -64,6 +64,12 @@ fun getPostBody() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
 fun getAllPosts(page: Int, size: Int) = getPostBody()
     .limit(size, ((page - 1) * size).toLong())
 
+/**
+ * 获取用户关注的人以及本人的帖子
+ */
+fun getFeedPosts(uid: Int, page: Int, size: Int) = getAllPosts(page, size)
+    .andWhere { UserTable.id inList getFollowingsList(uid).map { it.toInt() } + uid }
+
 fun getPostByOwner(name: String, page: Int, size: Int) = getAllPosts(page, size)
     .andWhere { UserTable.name eq name }
 
@@ -163,6 +169,11 @@ fun toggleLikePost(pid: Int, uid: Int): Int {
     return likes
 }
 
+/**
+ * 判断是否点赞
+ * @param pid 帖子id
+ * @param uid 用户id
+ */
 fun isLiked(pid: Int, uid: Int): Boolean {
     if (uid == -1) return false
 
@@ -173,6 +184,9 @@ fun isLiked(pid: Int, uid: Int): Boolean {
     return likesArr.contains(uid.toString())
 }
 
+/**
+ * 搜索
+ * @param keyword 关键词
+ */
 fun searchPosts(keyword: String) = postQuery()
     .andWhere { PostTable.content like "%$keyword%" }
-    .andWhere { PostTable.isBody eq Op.TRUE }
