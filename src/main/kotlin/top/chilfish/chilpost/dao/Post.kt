@@ -1,9 +1,6 @@
 package top.chilfish.chilpost.dao
 
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.MyError
 import top.chilfish.chilpost.model.PostStatusT
@@ -19,37 +16,6 @@ import top.chilfish.chilpost.model.UserTable
 import java.time.LocalDateTime
 import java.util.*
 
-fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
-    "id" to it[uuid].toString(),
-    "content" to it[PostTable.content],
-    "created_at" to it[PostTable.createdAt],
-    "is_body" to it[PostTable.isBody],
-
-    "parent_id" to it[parentId],
-    "child_id" to it[PostTable.childId],
-    "owner_id" to it[ownerId],
-    "deleted" to it[PostTable.deleted],
-
-    "media" to it[PostTable.media],
-    "status" to mapOf(
-        "is_liked" to isLiked(it[PostTable.id].value, uid),
-        "like_count" to it[like_count],
-        "comment_count" to it[PostStatusT.comment_count],
-        "repost_count" to it[PostStatusT.repost_count],
-    ),
-)
-
-fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid)
-    .plus(
-        mapOf(
-            "owner" to mapOf(
-                "id" to it[UserTable.id].value,
-                "name" to it[UserTable.name],
-                "nickname" to it[UserTable.nickname],
-                "avatar" to it[UserTable.avatar],
-            ),
-        )
-    )
 
 fun postDetail() = (PostTable innerJoin PostStatusT)
 

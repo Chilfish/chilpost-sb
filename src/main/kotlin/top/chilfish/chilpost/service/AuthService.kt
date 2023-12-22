@@ -6,13 +6,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.addUser
 import top.chilfish.chilpost.dao.getUserByEmail
-import top.chilfish.chilpost.dao.toUserDetail
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
-import top.chilfish.chilpost.model.AuthData
-import top.chilfish.chilpost.model.TokenData
-import top.chilfish.chilpost.model.User
-import top.chilfish.chilpost.model.UserToken
+import top.chilfish.chilpost.model.*
 import top.chilfish.chilpost.utils.getToken
 import java.util.*
 

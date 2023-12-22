@@ -5,7 +5,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.model.UpdatedUser
-import top.chilfish.chilpost.model.User
+import top.chilfish.chilpost.model.getUserDetail
+import top.chilfish.chilpost.model.toPostWithOwner
 import top.chilfish.chilpost.utils.uploadImage
 import java.util.*
 

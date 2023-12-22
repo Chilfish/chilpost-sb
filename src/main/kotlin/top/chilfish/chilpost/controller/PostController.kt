@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import top.chilfish.chilpost.PAGE_SIZE
 import top.chilfish.chilpost.error.ErrorCode
-import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.IdJson
 import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData

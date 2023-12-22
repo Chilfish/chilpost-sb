@@ -4,13 +4,10 @@ import org.springframework.core.io.FileSystemResource
 import org.springframework.http.*
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import top.chilfish.chilpost.utils.emptyFile
-import top.chilfish.chilpost.utils.filePath
-import top.chilfish.chilpost.utils.logger
 import java.io.File
 
 @Controller

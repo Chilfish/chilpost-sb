@@ -1,52 +1,18 @@
 package top.chilfish.chilpost.dao
 
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.UpdatedUser
-import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserStatusT.followers
 import top.chilfish.chilpost.model.UserStatusT.followings
 import top.chilfish.chilpost.model.UserTable
-import top.chilfish.chilpost.utils.logger
 import java.util.*
 
-fun toUserDetail(it: ResultRow, uid: Int = -1) = mapOf(
-    "id" to it[UserTable.uuid].toString(),
-    "name" to it[UserTable.name],
-    "nickname" to it[UserTable.nickname],
-    "email" to it[UserTable.email],
-    "password" to it[UserTable.password],
-    "avatar" to it[UserTable.avatar],
-    "bio" to it[UserTable.bio],
-
-//    "level" to it[UserTable.level],
-//    "deleted" to it[UserTable.deleted],
-//    "createdAt" to it[UserTable.createdAt],
-    "status" to mapOf(
-        "post_count" to it[UserStatusT.postCount],
-        "follower_count" to it[UserStatusT.followerCount],
-        "following_count" to it[UserStatusT.followingCount],
-        "followers" to it[followers],
-//        "followings" to it[followings],
-        "is_following" to isFollowing(uid, it[UserTable.id].value),
-    ),
-)
-
-fun getUserDetail(name: String, uid: Int = -1): MutableMap<String, Any> {
-    val res = (
-            userDetail()
-                .select { UserTable.name eq name }
-                .withDistinct()
-                .map { toUserDetail(it, uid) }
-                .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
-            ).toMutableMap()
-
-    res["password"] = "******"
-
-    return res
-}
 
 fun userDetail() = (UserTable innerJoin UserStatusT)
 

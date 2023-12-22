@@ -11,7 +11,6 @@ import org.springframework.core.annotation.Order
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
-import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.verifyToken
 
 @Order(1)

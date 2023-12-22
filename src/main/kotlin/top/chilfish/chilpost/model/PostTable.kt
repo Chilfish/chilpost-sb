@@ -2,11 +2,11 @@ package top.chilfish.chilpost.model
 
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.json.json
-import top.chilfish.chilpost.model.UserTable.default
+import top.chilfish.chilpost.dao.isLiked
 import java.time.LocalDateTime
-import java.util.*
 
 object PostTable : IntIdTable("posts") {
     val uuid  = uuid("uuid").index()
@@ -34,3 +34,35 @@ object PostStatusT : IntIdTable("post_status") {
     val comments = json<Array<String>>("comments", Json.Default).default(arrayOf())
     val reposts = json<Array<String>>("reposts", Json.Default).default(arrayOf())
 }
+
+fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
+    "id" to it[PostTable.uuid].toString(),
+    "content" to it[PostTable.content],
+    "created_at" to it[PostTable.createdAt],
+    "is_body" to it[PostTable.isBody],
+
+    "parent_id" to it[PostTable.parentId],
+    "child_id" to it[PostTable.childId],
+    "owner_id" to it[PostTable.ownerId],
+    "deleted" to it[PostTable.deleted],
+
+    "media" to it[PostTable.media],
+    "status" to mapOf(
+        "is_liked" to isLiked(it[PostTable.id].value, uid),
+        "like_count" to it[PostStatusT.like_count],
+        "comment_count" to it[PostStatusT.comment_count],
+        "repost_count" to it[PostStatusT.repost_count],
+    ),
+)
+
+fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid)
+    .plus(
+        mapOf(
+            "owner" to mapOf(
+                "id" to it[UserTable.id].value,
+                "name" to it[UserTable.name],
+                "nickname" to it[UserTable.nickname],
+                "avatar" to it[UserTable.avatar],
+            ),
+        )
+    )

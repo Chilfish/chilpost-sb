@@ -9,7 +9,6 @@ import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.model.UpdatedUser
-import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.service.UserService
 import top.chilfish.chilpost.utils.response
 import java.util.*
