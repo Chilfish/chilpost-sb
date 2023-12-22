@@ -40,8 +40,9 @@ class PostController(
 
     @GetMapping("/comments")
     fun getComments(
-        @RequestParam id: String
-    ) = response(data = postService.getComments(id))
+        @RequestParam id: String,
+        @RequestParam uid: String?,
+    ) = response(data = postService.getComments(id, uid))
 
     @GetMapping("search")
     fun search(

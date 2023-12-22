@@ -49,7 +49,7 @@ class PostService {
      * @param id 动态id
      * @param uid 用户id
      */
-    fun getById(id: String, uid: String?): MutableMap<String, Any?>? {
+    fun getById(id: String, uid: String?): Any? {
         val uuid = UUID.fromString(id)
         val userId = getUserId(uid)
 
@@ -64,22 +64,24 @@ class PostService {
             post["parent_post"] = parent
         }
 
-        return post
+        return mapOf(
+            "post" to post,
+        )
     }
 
     /**
      * 获取评论
      * @param pcId 父评论id
      */
-    fun getComments(pcId: String): Map<String, Any> {
+    fun getComments(pcId: String, uid: String?): Map<String, Any> {
         val uuid = UUID.fromString(pcId)
+        val ctxUid = getUserId(uid)
 
-        val comments = getCommentsById(uuid).map(::toPostWithOwner)
-
+        val comments = getCommentsById(uuid).map { toPostWithOwner(it, ctxUid) }
 
         return mapOf(
-            "comments" to comments,
-            "count" to comments.size
+            "posts" to comments,
+            "count" to comments.size,
         )
     }
 
