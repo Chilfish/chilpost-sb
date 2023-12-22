@@ -2,6 +2,8 @@ package top.chilfish.chilpost.utils
 
 import org.springframework.http.ResponseEntity
 import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.MyError
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.ApiReturn
 
 fun <T> response(
@@ -12,3 +14,6 @@ fun <T> response(
 ) = ResponseEntity.ok(
     ApiReturn(code, statusCode, message, data)
 )
+
+fun responseErr(ex: MyError) = response(ex.code, ex.statusCode, ex.message, null)
+fun responseErr(code: ErrorCode) = responseErr(newError(code))

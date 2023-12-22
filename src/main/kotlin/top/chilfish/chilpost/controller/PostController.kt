@@ -10,6 +10,7 @@ import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.PostService
 import top.chilfish.chilpost.utils.response
+import top.chilfish.chilpost.utils.responseErr
 import java.util.*
 
 @Controller
@@ -36,7 +37,11 @@ class PostController(
     fun getById(
         @RequestParam id: String,
         @RequestParam uid: String?
-    ) = response(data = postService.getById(id, uid))
+    ): Any {
+        val data = postService.getById(id, uid)
+            ?: return responseErr(ErrorCode.NOT_FOUND_POST)
+        return response(data = data)
+    }
 
     @GetMapping("/comments")
     fun getComments(
@@ -60,7 +65,7 @@ class PostController(
         val uid = UUID.fromString(user.id)
         val id = postService.newPost(form.content, uid, form.meta)
         if (id == -1)
-            throw newError(ErrorCode.INVALID_ID)
+            return responseErr(ErrorCode.INVALID_ID)
         return response(data = mapOf("id" to id))
     }
 

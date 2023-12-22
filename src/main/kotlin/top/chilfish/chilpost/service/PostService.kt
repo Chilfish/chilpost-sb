@@ -59,7 +59,8 @@ class PostService {
 
         if (post["parent_id"] != null) {
             val parent = getPostByUUId(post["parent_id"] as UUID)
-                .map { toPostWithOwner(it, userId) }.firstOrNull() ?: return null
+                .map { toPostWithOwner(it, userId) }.firstOrNull()
+                ?: return null
 
             post["parent_post"] = parent
         }
