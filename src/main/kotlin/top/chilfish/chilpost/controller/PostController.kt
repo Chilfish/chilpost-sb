@@ -69,6 +69,12 @@ class PostController(
         return response(data = mapOf("id" to id))
     }
 
+    @PostMapping("/delete")
+    fun deletePost(
+        @RequestBody data: IdJson,
+        @RequestAttribute("user") user: TokenData
+    ) = response(data = postService.rmPost(data.id, user.id))
+
     @PostMapping("/like")
     fun likePost(
         @RequestBody data: IdJson,

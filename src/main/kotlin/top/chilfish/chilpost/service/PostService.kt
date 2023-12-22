@@ -1,11 +1,16 @@
 package top.chilfish.chilpost.service
 
+import org.apache.coyote.http11.Constants.a
+import org.jetbrains.exposed.sql.andWhere
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.NewPostMeta
+import top.chilfish.chilpost.model.PostTable
+import top.chilfish.chilpost.model.UserStatusT.userId
+import top.chilfish.chilpost.utils.logger
 import java.util.*
 
 @Service
@@ -45,22 +50,21 @@ class PostService {
     }
 
     /**
-     * 获取动态详情
-     * @param id 动态id
-     * @param uid 用户id
+     * 获取推文详情
+     * @param pid 推文UUID
+     * @param uid 用户UUID
      */
-    fun getById(id: String, uid: String?): Any? {
-        val uuid = UUID.fromString(id)
+    fun getById(pid: String, uid: String?): Any? {
+        val postUUID = UUID.fromString(pid)
         val userId = getUserId(uid)
 
-        val post = getPostByUUId(uuid).map { toPostWithOwner(it, userId) }
+        val post = getPostByUUId(postUUID).map { toPostWithOwner(it, userId) }
             .firstOrNull()?.toMutableMap()
             ?: return null
 
         if (post["parent_id"] != null) {
             val parent = getPostByUUId(post["parent_id"] as UUID)
                 .map { toPostWithOwner(it, userId) }.firstOrNull()
-                ?: return null
 
             post["parent_post"] = parent
         }
@@ -128,6 +132,16 @@ class PostService {
         return addPost(content, ownerId, parentId)
     }
 
+    fun rmPost(pid: String, uid: String): Boolean {
+        try {
+            val postUUID = UUID.fromString(pid)
+            val userUUID = UUID.fromString(uid)
+            return deletePost(postUUID, userUUID)
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
     /**
      * 点赞或取消点赞
      * @param pid 帖子id
@@ -137,7 +151,7 @@ class PostService {
         val postId = getPostId(UUID.fromString(pid))
         val userId = getUserId(UUID.fromString(uid))
 
-        if (postId == null || userId == null)
+        if (postId == -1 || userId == -1)
             throw newError(ErrorCode.INVALID_PARAM)
 
         return toggleLikePost(postId, userId)

@@ -1,6 +1,9 @@
 package top.chilfish.chilpost.dao
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.MyError
 import top.chilfish.chilpost.model.PostStatusT
@@ -8,20 +11,24 @@ import top.chilfish.chilpost.model.PostStatusT.like_count
 import top.chilfish.chilpost.model.PostStatusT.likes
 import top.chilfish.chilpost.model.PostStatusT.post_id
 import top.chilfish.chilpost.model.PostTable
+import top.chilfish.chilpost.model.PostTable.ownerId
 import top.chilfish.chilpost.model.PostTable.parentId
+import top.chilfish.chilpost.model.PostTable.uuid
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
+import java.time.LocalDateTime
 import java.util.*
 
 fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
-    "id" to it[PostTable.uuid].toString(),
+    "id" to it[uuid].toString(),
     "content" to it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
 
     "parent_id" to it[parentId],
     "child_id" to it[PostTable.childId],
-    "owner_id" to it[PostTable.ownerId],
+    "owner_id" to it[ownerId],
+    "deleted" to it[PostTable.deleted],
 
     "media" to it[PostTable.media],
     "status" to mapOf(
@@ -29,8 +36,6 @@ fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
         "like_count" to it[like_count],
         "comment_count" to it[PostStatusT.comment_count],
         "repost_count" to it[PostStatusT.repost_count],
-        "comments" to it[PostStatusT.comments],
-        "reposts" to it[PostStatusT.reposts],
     ),
 )
 
@@ -52,17 +57,23 @@ fun postWithOwner() = postDetail()
     .join(
         UserTable,
         JoinType.INNER,
-        PostTable.ownerId,
+        ownerId,
         UserTable.uuid
     )
 
-fun postQuery() = postWithOwner().selectAll()
+fun allPostQuery() = postWithOwner().selectAll()
     .orderBy(PostTable.createdAt to SortOrder.DESC)
 
-fun getPostBody() = postQuery().andWhere { PostTable.isBody eq Op.TRUE }
+fun postQuery() = allPostQuery()
+    .andWhere { PostTable.deleted eq Op.FALSE }
 
-fun getAllPosts(page: Int, size: Int) = getPostBody()
-    .limit(size, ((page - 1) * size).toLong())
+
+fun getPostBody() = postQuery()
+    .andWhere { PostTable.isBody eq Op.TRUE }
+
+fun getAllPosts(page: Int, size: Int, body: Boolean = true) =
+    if (body) getPostBody() else postQuery()
+        .limit(size, ((page - 1) * size).toLong())
 
 /**
  * 获取用户关注的人以及本人的帖子
@@ -76,7 +87,8 @@ fun getPostByOwner(name: String, page: Int, size: Int) = getAllPosts(page, size)
 fun getPostById(id: Int) = postQuery().andWhere { PostTable.id eq id }
 fun getPostByUUId(uuid: UUID) = postQuery().andWhere { PostTable.uuid eq uuid }
 
-fun getPostId(id: UUID) = getPostByUUId(id).firstOrNull()?.get(PostTable.id)?.value
+fun getPostId(id: UUID) = getPostByUUId(id).firstOrNull()?.get(PostTable.id)?.value ?: -1
+fun getPostId(uuidStr: String?) = if (uuidStr == null) -1 else getPostId(UUID.fromString(uuidStr))
 
 fun getCommentsById(pcId: UUID) = postQuery()
     .andWhere { parentId eq pcId }
@@ -94,7 +106,7 @@ fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
 //    logger.info("addPost: $content, $ownerId, $parentId")
     if (parentId != null) {
         parentPost = postDetail()
-            .select { PostTable.uuid eq parentId }
+            .select { uuid eq parentId }
             .firstOrNull() ?: throw MyError(ErrorCode.NOT_FOUND_POST)
     }
 
@@ -136,7 +148,7 @@ fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
 }
 
 fun canComment(parentId: UUID) = postWithOwner()
-    .select { PostTable.uuid eq parentId }
+    .select { uuid eq parentId }
     .firstOrNull() != null
 
 
@@ -169,6 +181,15 @@ fun toggleLikePost(pid: Int, uid: Int): Int {
     return likes
 }
 
+fun deletePost(pid: UUID, uid: UUID): Boolean {
+    val res = PostTable.update({ uuid eq pid and (ownerId eq uid) }) {
+        it[deleted] = true
+        it[deletedAt] = LocalDateTime.now()
+    }
+
+    return res > 0
+}
+
 /**
  * 判断是否点赞
  * @param pid 帖子id
@@ -188,5 +209,5 @@ fun isLiked(pid: Int, uid: Int): Boolean {
  * 搜索
  * @param keyword 关键词
  */
-fun searchPosts(keyword: String, page: Int, size: Int) = getAllPosts(page, size)
+fun searchPosts(keyword: String, page: Int, size: Int) = getAllPosts(page, size, false)
     .andWhere { PostTable.content like "%$keyword%" }
