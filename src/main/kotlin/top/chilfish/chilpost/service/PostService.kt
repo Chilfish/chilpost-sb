@@ -88,9 +88,9 @@ class PostService {
      * @param keyword 关键词
      * @param uid 用户id
      */
-    fun search(keyword: String, uid: String?): Map<String, Any> {
+    fun search(keyword: String, uid: String?, page: Int, size: Int): Map<String, Any> {
         val userId = getUserId(uid)
-        val posts = searchPosts(keyword).map { toPostWithOwner(it, userId) }
+        val posts = searchPosts(keyword, page, size).map { toPostWithOwner(it, userId) }
 
         return mapOf(
             "posts" to posts,

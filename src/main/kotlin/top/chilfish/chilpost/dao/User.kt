@@ -3,6 +3,7 @@ package top.chilfish.chilpost.dao
 import org.jetbrains.exposed.sql.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
+import top.chilfish.chilpost.model.UpdatedUser
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserStatusT.followers
@@ -135,12 +136,11 @@ fun isFollowing(uid: Int, fid: Int): Boolean {
     return myFollowings.contains(fid.toString()) && otherFollowers.contains(uid.toString())
 }
 
-fun updateUser(uid: UUID, newUser: User) =
+fun updateUser(uid: UUID, newUser: UpdatedUser) =
     UserTable.update({ UserTable.uuid eq uid }) {
         it[name] = newUser.name
         it[nickname] = newUser.nickname
         it[email] = newUser.email
-        it[avatar] = newUser.avatar
         it[bio] = newUser.bio
 
         // TODO: admin only

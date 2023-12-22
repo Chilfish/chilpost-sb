@@ -45,9 +45,11 @@ class PostController(
 
     @GetMapping("search")
     fun search(
-        @RequestParam q: String,
-        @RequestParam uid: String?
-    ) = response(data = postService.search(q, uid))
+        @RequestParam(defaultValue = "") q: String,
+        @RequestParam uid: String?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
+    ) = response(data = postService.search(q, uid, page, size))
 
     @PostMapping("/new")
     fun newPost(

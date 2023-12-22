@@ -188,5 +188,5 @@ fun isLiked(pid: Int, uid: Int): Boolean {
  * 搜索
  * @param keyword 关键词
  */
-fun searchPosts(keyword: String) = postQuery()
+fun searchPosts(keyword: String, page: Int, size: Int) = getAllPosts(page, size)
     .andWhere { PostTable.content like "%$keyword%" }

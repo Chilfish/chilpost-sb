@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import top.chilfish.chilpost.dao.*
+import top.chilfish.chilpost.model.UpdatedUser
 import top.chilfish.chilpost.model.User
 import top.chilfish.chilpost.utils.uploadImage
 import java.util.*
@@ -30,7 +31,7 @@ class UserService {
         "count" to toggleFollow(uid, fid)
     )
 
-    fun update(uid: UUID, newUser: User) = updateUser(uid, newUser)
+    fun update(uid: UUID, newUser: UpdatedUser) = updateUser(uid, newUser)
 
     fun uploadAvatar(uid: UUID, avatar: MultipartFile): String {
         val avatarUrl = uploadImage(avatar, "avatars", "user_$uid.png")
