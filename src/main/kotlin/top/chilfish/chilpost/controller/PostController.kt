@@ -25,8 +25,8 @@ class PostController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "$PAGE_SIZE") size: Int,
         @RequestParam username: String?,
-        @RequestAttribute("ctxUser") ctxUser: TokenData?,
-        @RequestParam with_owner: Boolean = true,
+        @RequestParam with_owner: Boolean? = true,
+        @RequestAttribute("ctxUser") ctxUser: TokenData? = null,
     ): Any {
         val data = if (username != null) {
             postService.getAllByOwnerName(username, page, size, ctxUser?.id)
@@ -39,7 +39,7 @@ class PostController(
         }
 
         // 不返回多余的 owner 信息
-        if (!with_owner) {
+        if (with_owner == false) {
             data["posts"] = (data["posts"] as List<*>).map { (it as Map<*, *>).minus("owner") }
         }
 

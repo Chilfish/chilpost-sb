@@ -20,12 +20,13 @@ class UserController(
     @GetMapping("/me")
     fun me(
         @RequestAttribute("ctxUser") ctxUser: TokenData,
-    ) = response(data = userService.getByName(ctxUser.name))
+    ) = response(data = userService.getByName(ctxUser.name, null))
 
     @GetMapping("/profile/{name}")
     fun userHome(
         @PathVariable name: String,
-    ) = response(data = userService.getByName(name).minus("email"))
+        @RequestAttribute("ctxUser") ctxUser: TokenData?,
+    ) = response(data = userService.getByName(name, ctxUser?.id).minus("email"))
 
 
     @PostMapping("/follow")

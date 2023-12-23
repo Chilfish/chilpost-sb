@@ -49,7 +49,7 @@ class AuthFilter : Filter {
             )
                 throw newError(ErrorCode.INVALID_TOKEN)
 
-            val userInfo = verifyToken<TokenData>(token?.get(1))
+            val userInfo = verifyToken<TokenData>(token?.lastOrNull())
 
             if (userInfo == null && !isInWhiteList(path))
                 throw newError(ErrorCode.INVALID_TOKEN)

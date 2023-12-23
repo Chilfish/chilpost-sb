@@ -3,6 +3,7 @@ package top.chilfish.chilpost.service
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import top.chilfish.chilpost.dao.getUserId
 import top.chilfish.chilpost.dao.toggleFollow
 import top.chilfish.chilpost.dao.updateAvatar
 import top.chilfish.chilpost.dao.updateUser
@@ -14,7 +15,10 @@ import java.util.*
 @Service
 @Transactional
 class UserService {
-    fun getByName(name: String) = getUserDetail(name)
+    fun getByName(name: String, ctxUUIDStr: String?): Map<String, Any> {
+        val ctxUid = ctxUUIDStr?.let { getUserId(it) } ?: -1
+        return getUserDetail(name, ctxUid)
+    }
 
     fun follow(uid: UUID, fid: UUID) = mapOf(
         "count" to toggleFollow(uid, fid)
