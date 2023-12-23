@@ -65,10 +65,9 @@ class PostController(
         @RequestAttribute("user") user: TokenData
     ): Any {
         val uid = UUID.fromString(user.id)
-        val id = postService.newPost(form.content, uid, form.meta)
-        if (id == -1)
-            return responseErr(ErrorCode.INVALID_ID)
-        return response(data = mapOf("id" to id))
+        val post = postService.newPost(form.content, uid, form.meta)
+            ?: return responseErr(ErrorCode.INVALID_ID)
+        return response(data = post)
     }
 
     @PostMapping("/delete")

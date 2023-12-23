@@ -8,7 +8,6 @@ import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.NewPostMeta
 import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.toPostWithOwner
-import top.chilfish.chilpost.utils.logger
 import java.util.*
 
 @Service
@@ -124,26 +123,38 @@ class PostService {
      * 插入 posts 表和 post_status 表，更新 users 表的 post_count
      * 如果是评论，还要更新 parent_post 的 comment_count 和 comments
      */
-    fun newPost(content: String, ownerId: UUID, meta: NewPostMeta): Int {
+    fun newPost(content: String, userUUID: UUID, meta: NewPostMeta): Any? {
 //        logger.info("newPost: $content, $ownerId, $meta")
 
         if (meta.type == "comment" && meta.pcId != null)
-            return newComment(content, ownerId, meta.pcId)
+            return newComment(content, userUUID, meta.pcId)
 
         if (meta.type != "post")
-            return -1
+            return null
 
-        return addPost(content, ownerId)
+        val userId = getUserId(userUUID)
+
+        val post = addPost(content, userUUID).map { toPostWithOwner(it, userId) }.first()
+
+        return mapOf(
+            "post" to post,
+        )
     }
 
     /**
      * 新增一篇帖子
      */
-    fun newComment(content: String, ownerId: UUID, parentId: UUID): Int {
+    fun newComment(content: String, userUUID: UUID, parentId: UUID): Any? {
         if (!canComment(parentId))
-            return -1
+            return null
 
-        return addPost(content, ownerId, parentId)
+        val userId = getUserId(userUUID)
+
+        val post = addPost(content, userUUID, parentId).map { toPostWithOwner(it, userId) }.first()
+
+        return mapOf(
+            "post" to post,
+        )
     }
 
     fun rmPost(pid: String, uid: String, parentId: String?): Boolean {

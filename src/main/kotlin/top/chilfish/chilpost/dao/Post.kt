@@ -67,7 +67,7 @@ fun getPageCount(size: Int) = (getPostBody().count() / size) + 1
  * 插入 posts 表和 post_status 表，更新 users 表的 post_count
  * 如果是评论，还要更新 parent_post 的 comment_count 和 comments
  */
-fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
+fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Query {
     var parentPost: ResultRow? = null
 //    logger.info("addPost: $content, $ownerId, $parentId")
     if (parentId != null) {
@@ -104,7 +104,9 @@ fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
         }
     }
 
-    return id
+    val post = getPostById(id)
+
+    return post
 }
 
 fun canComment(parentId: UUID) = postWithOwner()
