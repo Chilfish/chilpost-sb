@@ -5,7 +5,9 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.json.json
+import top.chilfish.chilpost.CROP_LENGTH
 import top.chilfish.chilpost.dao.isLiked
+import top.chilfish.chilpost.utils.cropText
 import java.time.LocalDateTime
 
 object PostTable : IntIdTable("posts") {
@@ -34,11 +36,16 @@ object PostStatusT : IntIdTable("post_status") {
 //    val reposts = json<Array<String>>("reposts", Json.Default).default(arrayOf())
 }
 
-fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
+fun toPostDetail(
+    it: ResultRow,
+    uid: Int = -1,
+    crop: Boolean = true
+) = mapOf(
     "id" to it[PostTable.uuid],
-    "content" to it[PostTable.content],
+    "content" to if (crop) it[PostTable.content].cropText() else it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
+    "is_long" to (it[PostTable.content].length > CROP_LENGTH),
 
     "parent_id" to it[PostTable.parentId],
     "child_id" to it[PostTable.childId],
@@ -54,7 +61,11 @@ fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
     ),
 )
 
-fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid).plus(
+fun toPostWithOwner(
+    it: ResultRow,
+    uid: Int = -1,
+    crop: Boolean = true
+) = toPostDetail(it, uid, crop).plus(
     mapOf(
         "owner" to mapOf(
             "id" to it[UserTable.uuid],

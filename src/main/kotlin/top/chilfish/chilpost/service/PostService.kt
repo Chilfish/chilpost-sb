@@ -26,6 +26,7 @@ class PostService {
             "posts" to posts,
             "count" to posts.size,
             "pages" to pages,
+            "page_size" to size,
         )
     }
 
@@ -44,6 +45,7 @@ class PostService {
             "posts" to posts,
             "count" to posts.size,
             "pages" to pages,
+            "page_size" to size,
         )
     }
 
@@ -56,7 +58,7 @@ class PostService {
         val postUUID = UUID.fromString(pid)
         val userId = getUserId(uid)
 
-        val post = getPostByUUId(postUUID).map { toPostWithOwner(it, userId) }
+        val post = getPostByUUId(postUUID).map { toPostWithOwner(it, userId, crop = false) }
             .firstOrNull()?.toMutableMap()
             ?: return null
 
@@ -94,6 +96,14 @@ class PostService {
      * @param uid 用户id
      */
     fun search(keyword: String, uid: String?, page: Int, size: Int): Map<String, Any> {
+        if (keyword.isEmpty()) {
+            return mapOf(
+                "posts" to listOf<Map<String, Any>>(),
+                "count" to 0,
+                "page_size" to size,
+            )
+        }
+
         val userId = getUserId(uid)
         val posts = searchPosts(keyword, page, size).map {
             val replyTo = getReplyTo(it[PostTable.uuid])
@@ -104,7 +114,8 @@ class PostService {
 
         return mapOf(
             "posts" to posts,
-            "count" to posts.size
+            "count" to posts.size,
+            "page_size" to size,
         )
     }
 

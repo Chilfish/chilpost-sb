@@ -13,7 +13,6 @@ import top.chilfish.chilpost.model.PostTable.parentId
 import top.chilfish.chilpost.model.PostTable.uuid
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
-import top.chilfish.chilpost.utils.logger
 import java.time.LocalDateTime
 import java.util.*
 
@@ -39,7 +38,7 @@ fun getPostBody() = postQuery()
     .andWhere { PostTable.isBody eq Op.TRUE }
 
 fun getAllPosts(page: Int, size: Int, body: Boolean = true) =
-    if (body) getPostBody() else postQuery()
+    (if (body) getPostBody() else postQuery())
         .limit(size, ((page - 1) * size).toLong())
 
 /**
@@ -200,3 +199,21 @@ fun isLiked(pid: Int, uid: Int): Boolean {
  */
 fun searchPosts(keyword: String, page: Int, size: Int) = getAllPosts(page, size, false)
     .andWhere { PostTable.content like "%$keyword%" }
+
+/**
+ * 获取回复的原文及用户名
+ */
+fun getReplyTo(postUUID: UUID): Map<String, Any>? {
+    val post = PostTable.select { uuid eq postUUID }.firstOrNull() ?: return null
+
+    val parentUUID = post[parentId] ?: return null
+    val parentOwnerUUID = PostTable.select { uuid eq parentUUID }.first()[ownerId]
+
+    val parentOwnerName = getUserByUUId(parentOwnerUUID).first()[UserTable.name]
+
+    return mapOf(
+        "id" to parentUUID,
+        "uid" to parentOwnerUUID,
+        "username" to parentOwnerName,
+    )
+}
