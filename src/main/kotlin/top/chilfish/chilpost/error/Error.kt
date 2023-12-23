@@ -44,6 +44,7 @@ val Errors = listOf(
 )
 
 
-fun newError(code: ErrorCode): MyError {
-    return Errors.firstOrNull { it.code == code } ?: MyError()
+fun newError(code: ErrorCode, message: String? = null): MyError {
+    val err = Errors.firstOrNull { it.code == code } ?: Errors.first()
+    return MyError(code, err.statusCode, message ?: err.message)
 }

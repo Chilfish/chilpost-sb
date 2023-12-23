@@ -6,7 +6,9 @@ import top.chilfish.chilpost.dao.*
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.NewPostMeta
+import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.toPostWithOwner
+import top.chilfish.chilpost.utils.logger
 import java.util.*
 
 @Service
@@ -75,10 +77,10 @@ class PostService {
      * @param pcId 父评论id
      */
     fun getComments(pcId: String, uid: String?): Map<String, Any> {
-        val uuid = UUID.fromString(pcId)
+        val postUUID = UUID.fromString(pcId)
         val ctxUid = getUserId(uid)
 
-        val comments = getCommentsById(uuid).map { toPostWithOwner(it, ctxUid) }
+        val comments = getCommentsById(postUUID).map { toPostWithOwner(it, ctxUid) }
 
         return mapOf(
             "posts" to comments,
@@ -93,7 +95,12 @@ class PostService {
      */
     fun search(keyword: String, uid: String?, page: Int, size: Int): Map<String, Any> {
         val userId = getUserId(uid)
-        val posts = searchPosts(keyword, page, size).map { toPostWithOwner(it, userId) }
+        val posts = searchPosts(keyword, page, size).map {
+            val replyTo = getReplyTo(it[PostTable.uuid])
+            toPostWithOwner(it, userId).toMutableMap().apply {
+                this["reply_to"] = replyTo
+            }
+        }
 
         return mapOf(
             "posts" to posts,
@@ -128,11 +135,13 @@ class PostService {
         return addPost(content, ownerId, parentId)
     }
 
-    fun rmPost(pid: String, uid: String): Boolean {
+    fun rmPost(pid: String, uid: String, parentId: String?): Boolean {
         try {
             val postUUID = UUID.fromString(pid)
             val userUUID = UUID.fromString(uid)
-            return deletePost(postUUID, userUUID)
+            val parentUUID = parentId?.let { UUID.fromString(it) }
+
+            return deletePost(postUUID, userUUID, parentUUID)
         } catch (e: Exception) {
             return false
         }

@@ -9,7 +9,7 @@ import top.chilfish.chilpost.dao.isLiked
 import java.time.LocalDateTime
 
 object PostTable : IntIdTable("posts") {
-    val uuid  = uuid("uuid").index()
+    val uuid = uuid("uuid").index()
     val ownerId = uuid("owner_id").index()
     val content = text("content")
     val deleted = bool("deleted").default(false)
@@ -31,12 +31,11 @@ object PostStatusT : IntIdTable("post_status") {
     val repost_count = integer("repost_count").default(0)
 
     val likes = json<Array<String>>("likes", Json.Default).default(arrayOf())
-    val comments = json<Array<String>>("comments", Json.Default).default(arrayOf())
-    val reposts = json<Array<String>>("reposts", Json.Default).default(arrayOf())
+//    val reposts = json<Array<String>>("reposts", Json.Default).default(arrayOf())
 }
 
 fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
-    "id" to it[PostTable.uuid].toString(),
+    "id" to it[PostTable.uuid],
     "content" to it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
@@ -55,14 +54,13 @@ fun toPostDetail(it: ResultRow, uid: Int = -1) = mapOf(
     ),
 )
 
-fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid)
-    .plus(
-        mapOf(
-            "owner" to mapOf(
-                "id" to it[UserTable.id].value,
-                "name" to it[UserTable.name],
-                "nickname" to it[UserTable.nickname],
-                "avatar" to it[UserTable.avatar],
-            ),
-        )
+fun toPostWithOwner(it: ResultRow, uid: Int = -1) = toPostDetail(it, uid).plus(
+    mapOf(
+        "owner" to mapOf(
+            "id" to it[UserTable.uuid],
+            "name" to it[UserTable.name],
+            "nickname" to it[UserTable.nickname],
+            "avatar" to it[UserTable.avatar],
+        ),
     )
+)

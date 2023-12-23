@@ -1,13 +1,16 @@
 package top.chilfish.chilpost.controller
 
+import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import top.chilfish.chilpost.PAGE_SIZE
 import top.chilfish.chilpost.error.ErrorCode
+import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.IdJson
 import top.chilfish.chilpost.model.NewPost
 import top.chilfish.chilpost.model.TokenData
 import top.chilfish.chilpost.service.PostService
+import top.chilfish.chilpost.utils.logger
 import top.chilfish.chilpost.utils.response
 import top.chilfish.chilpost.utils.responseErr
 import java.util.*
@@ -70,9 +73,20 @@ class PostController(
 
     @PostMapping("/delete")
     fun deletePost(
-        @RequestBody data: IdJson,
+        @RequestBody dataStr: String,
         @RequestAttribute("user") user: TokenData
-    ) = response(data = postService.rmPost(data.id, user.id))
+    ): Any {
+        try {
+            val data = Json.decodeFromString<IdJson>(dataStr)
+            logger.info("deletePost, $data")
+            return response(data = postService.rmPost(data.id, user.id, data.parent_id))
+        } catch (e: Exception) {
+//            logger.warn("deletePost: ${e.message}")
+            val regex = Regex("Fields? (.+) .+ required")
+            val match = regex.find(e.message ?: "")
+            return responseErr(newError(ErrorCode.INVALID_PARAM, match?.value?.trim()))
+        }
+    }
 
     @PostMapping("/like")
     fun likePost(

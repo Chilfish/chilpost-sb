@@ -6,13 +6,13 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.update
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
+import top.chilfish.chilpost.model.PostTable
 import top.chilfish.chilpost.model.UpdatedUser
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserStatusT.followers
 import top.chilfish.chilpost.model.UserStatusT.followings
 import top.chilfish.chilpost.model.UserTable
 import java.util.*
-
 
 fun userDetail() = (UserTable innerJoin UserStatusT)
 
@@ -26,6 +26,26 @@ fun getUserId(uuidStr: String?) = if (uuidStr == null) -1 else getUserId(UUID.fr
 
 fun getFollowersList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid }.first()[followers].toList()
 fun getFollowingsList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid }.first()[followings].toList()
+
+/**
+ * 获取回复的原文及用户名
+ */
+fun getReplyTo(postUUID: UUID): Map<String, Any> {
+    val parent = PostTable.select { PostTable.uuid eq postUUID }
+
+    if (parent.empty()) throw newError(ErrorCode.NOT_FOUND_POST)
+
+    val ownerUUID = parent.first()[PostTable.ownerId]
+    val parentUUID = parent.first()[PostTable.uuid]
+
+    val ownerName = getUserByUUId(ownerUUID).first()[UserTable.name]
+
+    return mapOf(
+        "id" to parentUUID,
+        "uid" to ownerUUID,
+        "username" to ownerName,
+    )
+}
 
 fun addUser(name: String, nickname: String, email: String, password: String): UUID {
     val id = UserTable

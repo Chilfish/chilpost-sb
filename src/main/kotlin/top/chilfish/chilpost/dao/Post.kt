@@ -13,6 +13,7 @@ import top.chilfish.chilpost.model.PostTable.parentId
 import top.chilfish.chilpost.model.PostTable.uuid
 import top.chilfish.chilpost.model.UserStatusT
 import top.chilfish.chilpost.model.UserTable
+import top.chilfish.chilpost.utils.logger
 import java.time.LocalDateTime
 import java.util.*
 
@@ -91,15 +92,9 @@ fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Int {
 
     // add a comment to parent post
     if (parentId != null && parentPost != null) {
-        val commentsArr = parentPost[PostStatusT.comments]
-            .toMutableList()
-            .apply { add(id.toString()) }
-            .toTypedArray()
-
         PostStatusT.update({ post_id eq parentPost[PostTable.id] }) {
             with(SqlExpressionBuilder) {
                 it[comment_count] = comment_count + 1
-                it[comments] = commentsArr
             }
         }
     }
@@ -147,13 +142,41 @@ fun toggleLikePost(pid: Int, uid: Int): Int {
     return likes
 }
 
-fun deletePost(pid: UUID, uid: UUID): Boolean {
-    val res = PostTable.update({ uuid eq pid and (ownerId eq uid) }) {
+/**
+ * 删除帖子，同时更新用户的 post_count，如果是评论，还要更新 parent_post 的 comment_count
+ * @param postUUID 帖子id
+ * @param userUUID 用户id
+ */
+fun deletePost(postUUID: UUID, userUUID: UUID, parentUUID: UUID?): Boolean {
+    val user = UserTable.select { UserTable.uuid eq userUUID }.firstOrNull()
+
+    if (user == null) return false
+
+    val uid = user[UserTable.id].value
+
+    val res1 = PostTable.update({ uuid eq postUUID }) {
         it[deleted] = true
         it[deletedAt] = LocalDateTime.now()
     }
 
-    return res > 0
+    val res2 = UserStatusT.update({ UserStatusT.userId eq uid }) {
+        with(SqlExpressionBuilder) {
+            it[postCount] = postCount - 1
+        }
+    }
+
+    // 如果不是评论，直接返回
+    if (parentUUID == null)
+        return res1 > 0 && res2 > 0
+
+    val parentPostId = PostTable.select { uuid eq parentUUID }.first()[PostTable.id].value
+    val res3 = PostStatusT.update({ post_id eq parentPostId }) {
+        with(SqlExpressionBuilder) {
+            it[comment_count] = comment_count - 1
+        }
+    }
+
+    return res1 > 0 && res2 > 0 && res3 > 0
 }
 
 /**

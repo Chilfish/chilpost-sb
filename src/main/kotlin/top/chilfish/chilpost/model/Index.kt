@@ -22,4 +22,9 @@ data class NewPostMeta(val type: String, val pcId: UUID?)
 
 data class NewPost(val content: String, val meta: NewPostMeta)
 
-data class IdJson(val id: String, val any: String?)
+@Serializable
+data class IdJson(
+    val id: String,
+    val uid: String? = null,
+    val parent_id: String? = null,
+)

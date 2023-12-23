@@ -43,7 +43,7 @@ object UserStatusT : IntIdTable("user_status") {
 
 
 fun toUserDetail(it: ResultRow, uid: Int = -1) = mapOf(
-    "id" to it[UserTable.uuid].toString(),
+    "id" to it[UserTable.uuid],
     "name" to it[UserTable.name],
     "nickname" to it[UserTable.nickname],
     "email" to it[UserTable.email],
