@@ -28,7 +28,8 @@ object UserTable : IntIdTable("users") {
     val updatedAt = datetime("updated_at").default(LocalDateTime.now())
 
     init {
-        uniqueIndex(name, email)
+        uniqueIndex(name)
+        uniqueIndex(email)
     }
 }
 

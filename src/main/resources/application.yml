@@ -8,9 +8,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       initialization-fail-timeout: 10000
+
   mvc:
     problemdetails:
       enabled: true
+  sql:
+    init:
+      mode: embedded
+      schema-locations: classpath:01.schema.sql
+      data-locations: classpath:02.data.sql
+  jpa:
+    hibernate:
+      ddl-auto: update
 server:
   error:
     whitelabel:

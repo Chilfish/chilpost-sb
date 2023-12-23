@@ -8,6 +8,7 @@ ARG APPNAME=chilpost-sb-0.0.1
 
 # We should build the jar file first
 COPY ./build/libs/$APPNAME.jar /app/app.jar
+COPY files/avatars/* /app/files/avatars
 
 ENV JAVA_OPTS="\
   -server \
