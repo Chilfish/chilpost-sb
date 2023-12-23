@@ -20,6 +20,10 @@ fun getUserByUUId(uuid: UUID) = userDetail().select { UserTable.uuid eq uuid }
 fun getUserByEmail(email: String) = userDetail().select { UserTable.email eq email }
 fun getUserByName(name: String) = userDetail().select { UserTable.name eq name }
 
+fun getUserUUID(name: String) = UserTable
+    .select { UserTable.name eq name }
+    .firstOrNull()?.get(UserTable.uuid)
+
 fun getUserId(uuid: UUID) = getUserByUUId(uuid).firstOrNull()?.get(UserStatusT.userId)?.value ?: -1
 fun getUserId(uuidStr: String?) = if (uuidStr == null) -1 else getUserId(UUID.fromString(uuidStr))
 

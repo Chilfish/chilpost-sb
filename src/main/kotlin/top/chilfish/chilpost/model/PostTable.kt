@@ -50,7 +50,7 @@ fun toPostDetail(
     "parent_id" to it[PostTable.parentId],
     "child_id" to it[PostTable.childId],
     "owner_id" to it[PostTable.ownerId],
-    "deleted" to it[PostTable.deleted],
+//    "deleted" to it[PostTable.deleted],
 
     "media" to it[PostTable.media],
     "status" to mapOf(
@@ -74,4 +74,4 @@ fun toPostWithOwner(
             "avatar" to it[UserTable.avatar],
         ),
     )
-)
+).minus("owner_id")

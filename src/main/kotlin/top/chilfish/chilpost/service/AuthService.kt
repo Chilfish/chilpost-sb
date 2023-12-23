@@ -33,7 +33,7 @@ class AuthService {
         if (user["password"] != data.password)
             throw newError(ErrorCode.INVALID_LOGIN)
 
-        user["password"] = "******"
+        user["password"] = ""
 
         val u = gson.fromJson(gson.toJson(user), User::class.java)
         return userWithToken(u)

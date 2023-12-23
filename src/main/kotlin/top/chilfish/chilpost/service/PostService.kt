@@ -16,7 +16,7 @@ class PostService {
     /**
      * 广场，获取所有动态
      */
-    fun getAll(uid: String?, page: Int, size: Int): Map<String, Any> {
+    fun getAll(uid: String?, page: Int, size: Int): MutableMap<String, Any> {
         val userId = getUserId(uid)
         val posts = getAllPosts(page, size).map { toPostWithOwner(it, userId) }
         val pages = getPageCount(size)
@@ -26,7 +26,27 @@ class PostService {
             "count" to posts.size,
             "pages" to pages,
             "page_size" to size,
-        )
+        ).toMutableMap()
+    }
+
+    fun getAllByOwnerId(ownerUUIDStr: String, page: Int, size: Int, ctxUUIDStr: String?): MutableMap<String, Any> {
+        val ownerUUID = UUID.fromString(ownerUUIDStr)
+        val ctxId = getUserId(ctxUUIDStr)
+
+        val posts = getAllPostsByOwnerId(ownerUUID, page, size).map { toPostWithOwner(it, ctxId) }
+        val pages = getPageCountByOwnerId(ownerUUID, size)
+
+        return mapOf(
+            "posts" to posts,
+            "count" to posts.size,
+            "pages" to pages,
+            "page_size" to size,
+        ).toMutableMap()
+    }
+
+    fun getAllByOwnerName(ownerName: String, page: Int, size: Int, ctxUUIDStr: String?): MutableMap<String, Any>? {
+        val ownerUUIDStr = getUserUUID(ownerName) ?: return null
+        return getAllByOwnerId(ownerUUIDStr.toString(), page, size, ctxUUIDStr)
     }
 
     /**
@@ -72,6 +92,7 @@ class PostService {
             "post" to post,
         )
     }
+
 
     /**
      * 获取评论

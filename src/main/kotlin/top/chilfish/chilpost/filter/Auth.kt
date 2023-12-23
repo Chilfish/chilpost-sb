@@ -22,36 +22,39 @@ class AuthFilter : Filter {
         "/post/get",
         "/post/comments",
         "/post/search",
-        "/user/@/.+",
-        "/user/test/.+",
-        "/post/test/.+",
+        "/user/profile/.+",
         "/files"
     )
+
+    /**
+     * 不强制要求带 token 的接口
+     */
+    private fun isInWhiteList(path: String) = whiteList.any { path.matches(it.toRegex()) }
 
     override fun doFilter(
         request: ServletRequest?,
         response: ServletResponse?,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
 
         val path = req.requestURI.substring(req.contextPath.length).replace("/api", "")
 
-//        logger.info("AuthFilter: $path isInWhiteList ${isInWhiteList(path)}")
-
-        if (isInWhiteList(path))
-            return chain.doFilter(request, response)
-
         try {
             val token = req.getHeader("Authorization")?.trim()?.split(" ")
-            if (token.isNullOrEmpty() || token.size != 2 || token[0] != "Bearer")
+            if (
+                !isInWhiteList(path) &&
+                (token.isNullOrEmpty() || token.size != 2 || token[0] != "Bearer")
+            )
                 throw newError(ErrorCode.INVALID_TOKEN)
 
-            val userInfo = verifyToken<TokenData>(token[1])
-                ?: throw newError(ErrorCode.INVALID_TOKEN)
+            val userInfo = verifyToken<TokenData>(token?.get(1))
 
-            req.setAttribute("user", userInfo)
+            if (userInfo == null && !isInWhiteList(path))
+                throw newError(ErrorCode.INVALID_TOKEN)
+
+            req.setAttribute("ctxUser", userInfo)
 
             chain.doFilter(request, response)
         } catch (e: Exception) {
@@ -59,9 +62,5 @@ class AuthFilter : Filter {
             req.setAttribute("filter.error", e)
             req.getRequestDispatcher("/err/filter").forward(req, res)
         }
-    }
-
-    private fun isInWhiteList(path: String): Boolean {
-        return whiteList.any { path.matches(it.toRegex()) }
     }
 }

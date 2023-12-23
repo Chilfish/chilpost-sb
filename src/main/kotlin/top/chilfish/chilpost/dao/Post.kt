@@ -41,6 +41,10 @@ fun getAllPosts(page: Int, size: Int, body: Boolean = true) =
     (if (body) getPostBody() else postQuery())
         .limit(size, ((page - 1) * size).toLong())
 
+fun getAllPostsByOwnerId(ownerUUID: UUID, page: Int, size: Int) =
+    getAllPosts(page, size)
+        .andWhere { ownerId eq ownerUUID }
+
 /**
  * 获取用户关注的人以及本人的帖子
  */
@@ -61,6 +65,9 @@ fun getCommentsById(pcId: UUID) = postQuery()
     .andWhere { PostTable.isBody eq Op.FALSE }
 
 fun getPageCount(size: Int) = (getPostBody().count() / size) + 1
+
+fun getPageCountByOwnerId(ownerUUID: UUID, size: Int) =
+    (getPostBody().andWhere { ownerId eq ownerUUID }.count() / size) + 1
 
 /**
  * 新增一篇帖子或是评论，返回帖子详情

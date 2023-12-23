@@ -13,7 +13,7 @@ import top.chilfish.chilpost.error.newError
 import java.time.LocalDateTime
 
 object UserTable : IntIdTable("users") {
-    val uuid  = uuid("uuid").index()
+    val uuid = uuid("uuid").index()
     val name = varchar("name", 255).index()
     val nickname = varchar("nickname", 255)
     val password = varchar("password", 255)
@@ -55,16 +55,16 @@ fun toUserDetail(it: ResultRow, uid: Int = -1) = mapOf(
 //    "deleted" to it[UserTable.deleted],
 //    "createdAt" to it[UserTable.createdAt],
     "status" to mapOf(
+        "is_following" to isFollowing(uid, it[UserTable.id].value),
         "post_count" to it[UserStatusT.postCount],
         "follower_count" to it[UserStatusT.followerCount],
         "following_count" to it[UserStatusT.followingCount],
-        "followers" to it[UserStatusT.followers],
+//        "followers" to it[UserStatusT.followers],
 //        "followings" to it[followings],
-        "is_following" to isFollowing(uid, it[UserTable.id].value),
     ),
 )
 
-fun getUserDetail(name: String, uid: Int = -1): MutableMap<String, Any> {
+fun getUserDetail(name: String, uid: Int = -1): Map<String, Any> {
     val res = (
             userDetail()
                 .select { UserTable.name eq name }
@@ -72,8 +72,7 @@ fun getUserDetail(name: String, uid: Int = -1): MutableMap<String, Any> {
                 .map { toUserDetail(it, uid) }
                 .firstOrNull() ?: throw newError(ErrorCode.NOT_FOUND_USER)
             ).toMutableMap()
-
-    res["password"] = "******"
+        .minus("password")
 
     return res
 }
