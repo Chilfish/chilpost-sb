@@ -10,10 +10,10 @@ data class ApiReturn<T>(
     val code: ErrorCode = ErrorCode.OK,
     val statusCode: Int = 200,
     val message: String = "ok",
-    val data: T? = null
+    val data: T? = null,
 )
 
-data class UserToken(val token: String, val user: User)
+data class UserToken(val token: String, val user: Map<String, Any>)
 
 @Serializable
 data class TokenData(val id: String, val name: String)

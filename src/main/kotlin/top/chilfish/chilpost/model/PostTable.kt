@@ -39,9 +39,9 @@ object PostStatusT : IntIdTable("post_status") {
 fun toPostDetail(
     it: ResultRow,
     uid: Int = -1,
-    crop: Boolean = true
+    crop: Boolean = true,
 ) = mapOf(
-    "id" to it[PostTable.uuid],
+    "id" to it[PostTable.uuid].toString(),
     "content" to if (crop) it[PostTable.content].cropText() else it[PostTable.content],
     "created_at" to it[PostTable.createdAt],
     "is_body" to it[PostTable.isBody],
@@ -64,11 +64,11 @@ fun toPostDetail(
 fun toPostWithOwner(
     it: ResultRow,
     uid: Int = -1,
-    crop: Boolean = true
+    crop: Boolean = true,
 ) = toPostDetail(it, uid, crop).plus(
     mapOf(
         "owner" to mapOf(
-            "id" to it[UserTable.uuid],
+            "id" to it[UserTable.uuid].toString(),
             "name" to it[UserTable.name],
             "nickname" to it[UserTable.nickname],
             "avatar" to it[UserTable.avatar],

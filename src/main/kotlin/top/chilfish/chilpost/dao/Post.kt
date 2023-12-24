@@ -1,6 +1,7 @@
 package top.chilfish.chilpost.dao
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.MyError
 import top.chilfish.chilpost.model.PostStatusT
@@ -76,39 +77,39 @@ fun getPageCountByOwnerId(ownerUUID: UUID, size: Int) =
  */
 fun addPost(content: String, ownerId: UUID, parentId: UUID? = null): Query {
     var parentPost: ResultRow? = null
-//    logger.info("addPost: $content, $ownerId, $parentId")
-    if (parentId != null) {
-        parentPost = postDetail()
-            .select { uuid eq parentId }
-            .firstOrNull() ?: throw MyError(ErrorCode.NOT_FOUND_POST)
-    }
 
-    val id = PostTable.insertAndGetId {
-        it[PostTable.content] = content
-        it[PostTable.ownerId] = ownerId
-        it[uuid] = UUID.randomUUID()
-
+    val id = transaction {
         if (parentId != null) {
-            it[PostTable.parentId] = parentId
-            it[isBody] = false
+            parentPost = postDetail()
+                .select { uuid eq parentId }
+                .firstOrNull() ?: throw MyError(ErrorCode.NOT_FOUND_POST)
         }
-    }.value
 
-    PostStatusT.insert { it[post_id] = id }
+        val id = PostTable.insertAndGetId {
+            it[PostTable.content] = content
+            it[PostTable.ownerId] = ownerId
+            it[uuid] = UUID.randomUUID()
 
-    // add a comment to parent post
-    if (parentId != null && parentPost != null) {
-        PostStatusT.update({ post_id eq parentPost[PostTable.id] }) {
+            if (parentId != null) {
+                it[PostTable.parentId] = parentId
+                it[isBody] = false
+            }
+        }.value
+
+        PostStatusT.insert { it[post_id] = id }
+
+        // add a comment to parent post
+        if (parentId != null && parentPost != null) {
+            updateParentPostComment(parentPost!![PostTable.id].value, 1)
+        }
+
+        UserStatusT.update {
             with(SqlExpressionBuilder) {
-                it[comment_count] = comment_count + 1
+                it[postCount] = postCount + 1
             }
         }
-    }
 
-    UserStatusT.update {
-        with(SqlExpressionBuilder) {
-            it[postCount] = postCount + 1
-        }
+        id
     }
 
     val post = getPostById(id)
@@ -122,32 +123,34 @@ fun canComment(parentId: UUID) = postWithOwner()
 
 
 fun toggleLikePost(pid: Int, uid: Int): Int {
-    // Retrieve the current likes of the post
-    val likesArr = PostStatusT
-        .select { post_id eq pid }
-        .first()[likes]
-        .toMutableList()
+    return transaction {
+        // Retrieve the current likes of the post
+        val likesArr = PostStatusT
+            .select { post_id eq pid }
+            .first()[likes]
+            .toMutableList()
 
-    // Initialize the variable to track the change in like count
-    var added = 1
+        // Initialize the variable to track the change in like count
+        var added = 1
 
-    if (likesArr.contains(uid.toString())) {
-        likesArr.remove(uid.toString())
-        added = -1
-    } else {
-        likesArr.add(uid.toString())
-    }
-
-    PostStatusT.update({ post_id eq pid }) {
-        with(SqlExpressionBuilder) {
-            it[like_count] = like_count + added
-            it[likes] = likesArr.toTypedArray()
+        if (likesArr.contains(uid.toString())) {
+            likesArr.remove(uid.toString())
+            added = -1
+        } else {
+            likesArr.add(uid.toString())
         }
+
+        PostStatusT.update({ post_id eq pid }) {
+            with(SqlExpressionBuilder) {
+                it[like_count] = like_count + added
+                it[likes] = likesArr.toTypedArray()
+            }
+        }
+
+        val likes = PostStatusT.select { post_id eq pid }.first()[like_count]
+
+        likes
     }
-
-    val likes = PostStatusT.select { post_id eq pid }.first()[like_count]
-
-    return likes
 }
 
 /**
@@ -162,29 +165,50 @@ fun deletePost(postUUID: UUID, userUUID: UUID, parentUUID: UUID?): Boolean {
 
     val uid = user[UserTable.id].value
 
-    val res1 = PostTable.update({ uuid eq postUUID }) {
+    return transaction {
+        try {
+            val res1 = setDeletePost(postUUID)
+            val res2 = updateUserPostCount(uid, -1)
+
+            if (parentUUID != null) {
+                val res3 = updateParentPostCommentCount(parentUUID, -1)
+                res1 > 0 && res2 > 0 && res3 > 0
+            } else {
+                res1 > 0 && res2 > 0
+            }
+        } catch (e: Exception) {
+            rollback()
+            false
+        }
+    }
+}
+
+fun setDeletePost(postUUID: UUID): Int {
+    return PostTable.update({ uuid eq postUUID }) {
         it[deleted] = true
         it[deletedAt] = LocalDateTime.now()
     }
+}
 
-    val res2 = UserStatusT.update({ UserStatusT.userId eq uid }) {
+fun updateUserPostCount(userId: Int, count: Int): Int {
+    return UserStatusT.update({ UserStatusT.userId eq userId }) {
         with(SqlExpressionBuilder) {
-            it[postCount] = postCount - 1
+            it[postCount] = postCount + count
         }
     }
+}
 
-    // 如果不是评论，直接返回
-    if (parentUUID == null)
-        return res1 > 0 && res2 > 0
-
+fun updateParentPostCommentCount(parentUUID: UUID, count: Int): Int {
     val parentPostId = PostTable.select { uuid eq parentUUID }.first()[PostTable.id].value
-    val res3 = PostStatusT.update({ post_id eq parentPostId }) {
+    return updateParentPostComment(parentPostId, count)
+}
+
+fun updateParentPostComment(parentPostId: Int, count: Int): Int {
+    return PostStatusT.update({ post_id eq parentPostId }) {
         with(SqlExpressionBuilder) {
-            it[comment_count] = comment_count - 1
+            it[comment_count] = comment_count + count
         }
     }
-
-    return res1 > 0 && res2 > 0 && res3 > 0
 }
 
 /**

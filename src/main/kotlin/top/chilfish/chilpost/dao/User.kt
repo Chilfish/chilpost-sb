@@ -1,9 +1,7 @@
 package top.chilfish.chilpost.dao
 
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 import top.chilfish.chilpost.error.ErrorCode
 import top.chilfish.chilpost.error.newError
 import top.chilfish.chilpost.model.UpdatedUser
@@ -31,20 +29,22 @@ fun getFollowersList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid 
 fun getFollowingsList(uid: Int) = UserStatusT.select { UserStatusT.userId eq uid }.first()[followings].toList()
 
 
-fun addUser(name: String, nickname: String, email: String, password: String): UUID {
-    val id = UserTable
-        .insertAndGetId {
-            it[UserTable.name] = name
-            it[UserTable.nickname] = nickname
-            it[UserTable.password] = password
-            it[UserTable.email] = email
-            it[uuid] = UUID.randomUUID()
-        }.value
+fun addUser(name: String, nickname: String, email: String, password: String): Query {
+    return transaction {
+        val id = UserTable
+            .insertAndGetId {
+                it[UserTable.name] = name
+                it[UserTable.nickname] = nickname
+                it[UserTable.password] = password
+                it[UserTable.email] = email
+                it[uuid] = UUID.randomUUID()
+            }.value
 
-    UserStatusT.insert { it[userId] = id }
+        UserStatusT.insert { it[userId] = id }
 
-    val uuid = getUserById(id).first()[UserTable.uuid]
-    return uuid
+        val user = getUserById(id)
+        user
+    }
 }
 
 /**
@@ -73,14 +73,21 @@ fun toggleFollow(uidUU: UUID, fidUU: UUID): Int {
         otherFollowers.add(uid)
     }
 
-    UserStatusT.update({ UserStatusT.userId eq uid.toInt() }) {
-        it[followings] = myFollowings.toTypedArray()
-        it[followingCount] = myFollowings.size
-    }
+    transaction {
+        try {
+            UserStatusT.update({ UserStatusT.userId eq uid.toInt() }) {
+                it[followings] = myFollowings.toTypedArray()
+                it[followingCount] = myFollowings.size
+            }
 
-    UserStatusT.update({ UserStatusT.userId eq fid.toInt() }) {
-        it[followers] = otherFollowers.toTypedArray()
-        it[followerCount] = otherFollowers.size
+            UserStatusT.update({ UserStatusT.userId eq fid.toInt() }) {
+                it[followers] = otherFollowers.toTypedArray()
+                it[followerCount] = otherFollowers.size
+            }
+        } catch (e: Exception) {
+            rollback()
+            false
+        }
     }
 
     return otherFollowers.size
